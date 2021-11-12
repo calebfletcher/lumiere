@@ -2,7 +2,7 @@ use std::ops::{
     Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign,
 };
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct Vec3 {
     pub x: f64,
     pub y: f64,
@@ -10,23 +10,23 @@ pub struct Vec3 {
 }
 
 impl Vec3 {
-    fn new(x: f64, y: f64, z: f64) -> Self {
+    pub fn new(x: f64, y: f64, z: f64) -> Self {
         Self { x, y, z }
     }
 
-    fn zeros() -> Self {
+    pub fn zeros() -> Self {
         Self::new(0., 0., 0.)
     }
 
-    fn length_squared(&self) -> f64 {
+    pub fn length_squared(&self) -> f64 {
         self.x.powi(2) + self.y.powi(2) + self.z.powi(2)
     }
 
-    fn length(&self) -> f64 {
+    pub fn length(&self) -> f64 {
         self.length_squared().sqrt()
     }
 
-    fn unit(&self) -> Self {
+    pub fn unit(&self) -> Self {
         let len = self.length();
         Self {
             x: self.x / len,
@@ -35,11 +35,11 @@ impl Vec3 {
         }
     }
 
-    fn dot(&self, other: Self) -> f64 {
+    pub fn dot(&self, other: Self) -> f64 {
         self.x * other.x + self.y * other.y + self.z * other.z
     }
 
-    fn cross(&self, other: Self) -> Self {
+    pub fn cross(&self, other: Self) -> Self {
         Self {
             x: self.y * other.z - self.z * other.y,
             y: self.z * other.x - self.x * other.z,
