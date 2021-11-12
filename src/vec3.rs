@@ -3,7 +3,7 @@ use std::ops::{
 };
 
 #[derive(Debug, Clone)]
-struct Vec3 {
+pub struct Vec3 {
     pub x: f64,
     pub y: f64,
     pub z: f64,
