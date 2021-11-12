@@ -4,13 +4,7 @@ use std::{
     io::{self, Write},
 };
 
-use lumiere::{colour, ray::Ray, vec3::Vec3, Colour, Point3};
-
-fn ray_colour(ray: Ray) -> Colour {
-    let unit = ray.direction.unit();
-    let t = 0.5 * (unit.y + 1.0);
-    Colour::new(1.0, 1.0, 1.0) * (1.0 - t) + Colour::new(0.5, 0.7, 1.0) * t
-}
+use lumiere::{colour, ray::Ray, ray_colour, vec3::Vec3, Point3};
 
 fn main() -> Result<(), Box<dyn Error>> {
     // Image
@@ -51,7 +45,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                 origin,
                 lower_left_corner + horizontal * u + vertical * v - origin,
             );
-            let pixel_colour = ray_colour(r);
+            let pixel_colour = ray_colour(&r);
 
             colour::write_colour(&file, pixel_colour)?;
         }
