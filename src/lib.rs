@@ -4,7 +4,6 @@
 use object::Hittable;
 use ray::Ray;
 
-pub mod colour;
 pub mod image;
 pub mod object;
 pub mod ray;
