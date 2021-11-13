@@ -47,7 +47,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     }
     eprintln!("\nRaytracing Completed");
 
-    image::ppm::write_image(pixels, Path::new("image.ppm"))?;
+    image::png::write_image(pixels, Path::new("image.png"))?;
     eprintln!("Saved image");
 
     Ok(())
