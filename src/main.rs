@@ -13,9 +13,10 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // Image
     const ASPECT_RATIO: f64 = 16. / 9.;
-    const IMAGE_WIDTH: usize = 400;
+    const IMAGE_WIDTH: usize = 1200;
     const IMAGE_HEIGHT: usize = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as usize;
-    let samples_per_pixel = 100;
+    let samples_per_pixel: usize = 100;
+    let max_depth = 50;
 
     // World
     let mut world = object::HittableList::new();
@@ -46,13 +47,13 @@ fn main() -> Result<(), Box<dyn Error>> {
                 let u = (col as f64 + rng.gen::<f64>()) / (IMAGE_WIDTH - 1) as f64;
                 let v = (row as f64 + rng.gen::<f64>()) / (IMAGE_HEIGHT - 1) as f64;
                 let r = camera.get_ray(u, v);
-                pixel_colour += ray_colour(&r, &world);
+                pixel_colour += ray_colour(&r, &world, max_depth, &mut rng);
             }
             pixel_colour /= samples_per_pixel as f64;
 
-            pixels[row][col][0] = (pixel_colour.x * 255.999) as u8;
-            pixels[row][col][1] = (pixel_colour.y * 255.999) as u8;
-            pixels[row][col][2] = (pixel_colour.z * 255.999) as u8;
+            pixels[row][col][0] = (pixel_colour.x.sqrt() * 255.999) as u8;
+            pixels[row][col][1] = (pixel_colour.y.sqrt() * 255.999) as u8;
+            pixels[row][col][2] = (pixel_colour.z.sqrt() * 255.999) as u8;
         }
     }
     eprintln!("\nRaytracing Completed");

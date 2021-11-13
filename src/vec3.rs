@@ -1,5 +1,6 @@
 use std::ops::{
-    Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign,
+    Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Range, RangeInclusive,
+    Sub, SubAssign,
 };
 
 #[derive(Debug, Clone, Copy)]
@@ -44,6 +45,37 @@ impl Vec3 {
             x: self.y * other.z - self.z * other.y,
             y: self.z * other.x - self.x * other.z,
             z: self.x * other.y - self.y * other.x,
+        }
+    }
+
+    /// Creates a new vector where each of the components is independently
+    /// uniformly sampled within a range. The supplied range is exclusive in
+    /// the upper bound.
+    pub fn random_in_range(rng: &mut impl rand::Rng, range: Range<f64>) -> Self {
+        Self {
+            x: rng.gen_range(range.clone()),
+            y: rng.gen_range(range.clone()),
+            z: rng.gen_range(range),
+        }
+    }
+
+    /// Creates a new vector where each of the components is independently
+    /// uniformly sampled within a range. The supplied range is inclusive in
+    /// the upper bound.
+    pub fn random_in_range_inclusive(rng: &mut impl rand::Rng, range: RangeInclusive<f64>) -> Self {
+        Self {
+            x: rng.gen_range(range.clone()),
+            y: rng.gen_range(range.clone()),
+            z: rng.gen_range(range),
+        }
+    }
+
+    pub fn random_in_unit_sphere(rng: &mut impl rand::Rng) -> Self {
+        loop {
+            let v = Self::random_in_range(rng, -1.0..1.0);
+            if v.length_squared() <= 1.0 {
+                break v;
+            }
         }
     }
 }

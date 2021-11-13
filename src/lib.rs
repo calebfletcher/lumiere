@@ -13,11 +13,22 @@ pub mod vec3;
 pub type Point3 = vec3::Vec3;
 pub type Colour = vec3::Vec3;
 
-pub fn ray_colour(r: &Ray, world: &impl Hittable) -> Colour {
-    match world.hit(r, 0., f64::INFINITY) {
+pub fn ray_colour(
+    r: &Ray,
+    world: &impl Hittable,
+    depth: usize,
+    rng: &mut impl rand::Rng,
+) -> Colour {
+    if depth <= 0 {
+        return Colour::new(0., 0., 0.);
+    }
+    match world.hit(r, 0.001, f64::INFINITY) {
         Some(hitrec) => {
-            // Ray intersect sphere
-            (hitrec.normal + Colour::new(1., 1., 1.)) * 0.5
+            // Ray intersects object
+            let target =
+                hitrec.point + hitrec.normal + vec3::Vec3::random_in_unit_sphere(rng).unit();
+            let new_ray = Ray::new(hitrec.point, target - hitrec.point);
+            ray_colour(&new_ray, world, depth - 1, rng) * 0.5
         }
         None => {
             // Ray doesn't intersect any objects
