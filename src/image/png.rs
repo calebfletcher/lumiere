@@ -12,7 +12,7 @@ where
 {
     // Create the file
     let file = File::create(path)?;
-    let ref mut w = BufWriter::new(file);
+    let w = BufWriter::new(file);
 
     // Create the PNG encoder
     let mut encoder = png::Encoder::new(

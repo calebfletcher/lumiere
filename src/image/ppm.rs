@@ -16,9 +16,8 @@ pub fn write_image<P: AsRef<Path>, const WIDTH: usize, const HEIGHT: usize>(
     file.write_all(format!("{} {}\n", WIDTH, HEIGHT).as_bytes())?;
     file.write_all(format!("{}\n", max_value).as_bytes())?;
 
-    for row in 0..HEIGHT {
-        for col in 0..WIDTH {
-            let pixel = pixels[row][col];
+    for row in pixels {
+        for pixel in row {
             file.write_all(format!("{} {} {}\n", pixel[0], pixel[1], pixel[2]).as_bytes())?
         }
     }

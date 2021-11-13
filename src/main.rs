@@ -26,6 +26,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     // Pixel array as height * rows * channels 8 bit values
     let mut pixels = [[[0_u8; 3]; IMAGE_WIDTH]; IMAGE_HEIGHT];
 
+    #[allow(clippy::needless_range_loop)]
     for row in 0..IMAGE_HEIGHT {
         // Print progress indicator
         eprint!("\rScanlines remaining: {} ", IMAGE_HEIGHT - row);
