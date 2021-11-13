@@ -4,6 +4,7 @@
 use object::Hittable;
 use ray::Ray;
 
+pub mod camera;
 pub mod image;
 pub mod object;
 pub mod ray;

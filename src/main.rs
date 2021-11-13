@@ -4,7 +4,7 @@ use std::{
     path::Path,
 };
 
-use lumiere::{image, object, ray::Ray, ray_colour, vec3::Vec3, Point3};
+use lumiere::{camera, image, object, ray_colour, Point3};
 
 fn main() -> Result<(), Box<dyn Error>> {
     // Image
@@ -21,15 +21,10 @@ fn main() -> Result<(), Box<dyn Error>> {
     )));
 
     // Camera
-    let viewport_height = 2.0;
-    let viewport_width = ASPECT_RATIO * viewport_height;
-    let focal_length = 1.;
-
-    let origin = Point3::new(0., 0., 0.);
-    let horizontal = Vec3::new(viewport_width, 0., 0.);
-    let vertical = Vec3::new(0., viewport_height, 0.);
-    let top_left_corner =
-        origin - horizontal / 2. + vertical / 2. - Vec3::new(0., 0., focal_length);
+    let camera = camera::CameraBuilder::new()
+        .origin(Point3::new(0., 0., 0.))
+        .focal_length(1.)
+        .build();
 
     // Pixel array as height * rows * channels 8 bit values
     let mut pixels = [[[0_u8; 3]; IMAGE_WIDTH]; IMAGE_HEIGHT];
@@ -43,10 +38,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         for col in 0..IMAGE_WIDTH {
             let u = col as f64 / (IMAGE_WIDTH - 1) as f64;
             let v = row as f64 / (IMAGE_HEIGHT - 1) as f64;
-            let r = Ray::new(
-                origin,
-                top_left_corner + horizontal * u - vertical * v - origin,
-            );
+            let r = camera.get_ray(u, v);
             let pixel_colour = ray_colour(&r, &world);
 
             pixels[row][col][0] = (pixel_colour.x * 255.999) as u8;
