@@ -4,13 +4,18 @@ use std::{
     path::Path,
 };
 
-use lumiere::{camera, image, object, ray_colour, Point3};
+use rand::Rng;
+
+use lumiere::{camera, image, object, ray_colour, Colour, Point3};
 
 fn main() -> Result<(), Box<dyn Error>> {
+    let mut rng = rand::thread_rng();
+
     // Image
     const ASPECT_RATIO: f64 = 16. / 9.;
     const IMAGE_WIDTH: usize = 400;
     const IMAGE_HEIGHT: usize = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as usize;
+    let samples_per_pixel = 100;
 
     // World
     let mut world = object::HittableList::new();
@@ -36,10 +41,14 @@ fn main() -> Result<(), Box<dyn Error>> {
         io::stderr().flush()?;
 
         for col in 0..IMAGE_WIDTH {
-            let u = col as f64 / (IMAGE_WIDTH - 1) as f64;
-            let v = row as f64 / (IMAGE_HEIGHT - 1) as f64;
-            let r = camera.get_ray(u, v);
-            let pixel_colour = ray_colour(&r, &world);
+            let mut pixel_colour = Colour::zeros();
+            for _ in 0..samples_per_pixel {
+                let u = (col as f64 + rng.gen::<f64>()) / (IMAGE_WIDTH - 1) as f64;
+                let v = (row as f64 + rng.gen::<f64>()) / (IMAGE_HEIGHT - 1) as f64;
+                let r = camera.get_ray(u, v);
+                pixel_colour += ray_colour(&r, &world);
+            }
+            pixel_colour /= samples_per_pixel as f64;
 
             pixels[row][col][0] = (pixel_colour.x * 255.999) as u8;
             pixels[row][col][1] = (pixel_colour.y * 255.999) as u8;
