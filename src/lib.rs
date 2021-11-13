@@ -1,7 +1,7 @@
 use ray::Ray;
 
 pub mod colour;
-pub mod ppm;
+pub mod image;
 pub mod ray;
 pub mod vec3;
 
