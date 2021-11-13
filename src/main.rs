@@ -4,7 +4,7 @@ use std::{
     path::Path,
 };
 
-use lumiere::{image, ray::Ray, ray_colour, vec3::Vec3, Point3};
+use lumiere::{image, object, ray::Ray, ray_colour, vec3::Vec3, Point3};
 
 fn main() -> Result<(), Box<dyn Error>> {
     // Image
@@ -12,16 +12,24 @@ fn main() -> Result<(), Box<dyn Error>> {
     const IMAGE_WIDTH: usize = 400;
     const IMAGE_HEIGHT: usize = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as usize;
 
+    // World
+    let mut world = object::HittableList::new();
+    world.add(Box::new(object::Sphere::new(Point3::new(0., 0., -1.), 0.5)));
+    world.add(Box::new(object::Sphere::new(
+        Point3::new(0., -100.5, 0.),
+        100.,
+    )));
+
     // Camera
     let viewport_height = 2.0;
     let viewport_width = ASPECT_RATIO * viewport_height;
-    let focal_length = 1.0;
+    let focal_length = 1.;
 
     let origin = Point3::new(0., 0., 0.);
     let horizontal = Vec3::new(viewport_width, 0., 0.);
     let vertical = Vec3::new(0., viewport_height, 0.);
-    let lower_left_corner =
-        origin - horizontal / 2. - vertical / 2. - Vec3::new(0., 0., focal_length);
+    let top_left_corner =
+        origin - horizontal / 2. + vertical / 2. - Vec3::new(0., 0., focal_length);
 
     // Pixel array as height * rows * channels 8 bit values
     let mut pixels = [[[0_u8; 3]; IMAGE_WIDTH]; IMAGE_HEIGHT];
@@ -37,13 +45,13 @@ fn main() -> Result<(), Box<dyn Error>> {
             let v = row as f64 / (IMAGE_HEIGHT - 1) as f64;
             let r = Ray::new(
                 origin,
-                lower_left_corner + horizontal * u + vertical * v - origin,
+                top_left_corner + horizontal * u - vertical * v - origin,
             );
-            let pixel_colour = ray_colour(&r);
+            let pixel_colour = ray_colour(&r, &world);
 
-            pixels[row][col][0] = (pixel_colour.x * 255.) as u8;
-            pixels[row][col][1] = (pixel_colour.y * 255.) as u8;
-            pixels[row][col][2] = (pixel_colour.z * 255.) as u8;
+            pixels[row][col][0] = (pixel_colour.x * 255.999) as u8;
+            pixels[row][col][1] = (pixel_colour.y * 255.999) as u8;
+            pixels[row][col][2] = (pixel_colour.z * 255.999) as u8;
         }
     }
     eprintln!("\nRaytracing Completed");
