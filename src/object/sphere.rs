@@ -40,9 +40,9 @@ impl object::Hittable for Sphere {
         }
 
         // Check if intersection(s) are within [t_min, t_max]
-        let root = (-half_b - discriminant.sqrt()) / a;
+        let mut root = (-half_b - discriminant.sqrt()) / a;
         if root < t_min || root > t_max {
-            let root = (-half_b + discriminant.sqrt()) / a;
+            root = (-half_b + discriminant.sqrt()) / a;
             if root < t_min || root > t_max {
                 return None;
             }
