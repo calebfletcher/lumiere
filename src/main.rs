@@ -13,15 +13,15 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // Image
     const ASPECT_RATIO: f64 = 16. / 9.;
-    const IMAGE_WIDTH: usize = 900;
+    const IMAGE_WIDTH: usize = 600;
     const IMAGE_HEIGHT: usize = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as usize;
-    let samples_per_pixel: usize = 1000;
+    let samples_per_pixel: usize = 100;
     let max_depth = 50;
 
     let material_ground = Box::new(material::Lambertian::new(Colour::new(0.8, 0.8, 0.0)));
     let material_centre = Box::new(material::Lambertian::new(Colour::new(0.7, 0.3, 0.3)));
-    let material_left = Box::new(material::Metal::new(Colour::new(0.8, 0.8, 0.8)));
-    let material_right = Box::new(material::Metal::new(Colour::new(0.8, 0.6, 0.2)));
+    let material_left = Box::new(material::Metal::new(Colour::new(0.8, 0.8, 0.8), 0.3));
+    let material_right = Box::new(material::Metal::new(Colour::new(0.8, 0.6, 0.2), 1.0));
 
     // World
     let mut world = object::HittableList::new();

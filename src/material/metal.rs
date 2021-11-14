@@ -1,15 +1,19 @@
-use crate::{object::HitRecord, ray::Ray, Colour};
+use crate::{object::HitRecord, ray::Ray, vec3::Vec3, Colour};
 
 use super::{Behaviour, Material, MaterialScatterResult};
 
 #[derive(Debug, Clone)]
 pub struct Metal {
     albedo: Colour,
+    fuzziness: f64,
 }
 
 impl Metal {
-    pub fn new(albedo: Colour) -> Self {
-        Self { albedo }
+    pub fn new(albedo: Colour, mut fuzziness: f64) -> Self {
+        if fuzziness > 1. {
+            fuzziness = 1.;
+        }
+        Self { albedo, fuzziness }
     }
 }
 
@@ -18,10 +22,13 @@ impl Material for Metal {
         &self,
         r: &Ray,
         hitrec: &HitRecord,
-        _rng: &mut rand::rngs::ThreadRng,
+        rng: &mut rand::rngs::ThreadRng,
     ) -> MaterialScatterResult {
         let reflected = r.direction.unit().reflect(hitrec.normal);
-        let scattered = Ray::new(hitrec.point, reflected);
+        let scattered = Ray::new(
+            hitrec.point,
+            reflected + Vec3::random_in_unit_sphere(rng) * self.fuzziness,
+        );
         let behaviour = match scattered.direction.dot(hitrec.normal) {
             d if d > 0. => Behaviour::Scatter,
             d if d <= 0. => Behaviour::Absorb,
