@@ -1,6 +1,6 @@
 use std::fmt;
 
-use crate::{material, ray::Ray, vec3::Vec3, Point3};
+use crate::{interval, material, ray::Ray, vec3::Vec3, Point3};
 
 #[derive(Debug)]
 pub struct HitRecord<'a> {
@@ -33,6 +33,6 @@ impl<'a> HitRecord<'a> {
 }
 
 pub trait Hittable: fmt::Debug {
-    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord>;
+    fn hit(&self, r: &Ray, ray_t: &interval::Interval) -> Option<HitRecord>;
     fn name(&self) -> String;
 }

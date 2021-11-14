@@ -1,4 +1,4 @@
-use crate::{material, ray::Ray, Point3};
+use crate::{interval, material, ray::Ray, Point3};
 
 use super::object;
 
@@ -27,7 +27,7 @@ impl Sphere {
 }
 
 impl object::Hittable for Sphere {
-    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<object::HitRecord> {
+    fn hit(&self, r: &Ray, ray_t: &interval::Interval) -> Option<object::HitRecord> {
         let oc = r.origin - self.centre;
         let a = r.direction.length_squared();
         let half_b = oc.dot(r.direction);
@@ -41,9 +41,9 @@ impl object::Hittable for Sphere {
 
         // Check if intersection(s) are within [t_min, t_max]
         let mut root = (-half_b - discriminant.sqrt()) / a;
-        if root < t_min || root > t_max {
+        if !ray_t.contains(root) {
             root = (-half_b + discriminant.sqrt()) / a;
-            if root < t_min || root > t_max {
+            if !ray_t.contains(root) {
                 return None;
             }
         }

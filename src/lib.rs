@@ -9,6 +9,7 @@ use ray::Ray;
 
 pub mod camera;
 pub mod image;
+pub mod interval;
 pub mod material;
 pub mod object;
 pub mod ray;
@@ -21,7 +22,7 @@ pub fn ray_colour(r: &Ray, world: &impl Hittable, depth: usize, rng: &mut Thread
     if depth <= 0 {
         return Colour::new(0., 0., 0.);
     }
-    match world.hit(r, 0.001, f64::INFINITY) {
+    match world.hit(r, &interval::Interval::new(0.001, f64::INFINITY)) {
         Some(hitrec) => {
             // Ray intersects object
 
