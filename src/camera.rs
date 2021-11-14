@@ -40,10 +40,16 @@ impl CameraBuilder {
 
         Camera {
             origin: self.origin,
-            upper_left_corner: upper_left_corner,
-            horizontal: horizontal,
-            vertical: vertical,
+            upper_left_corner,
+            horizontal,
+            vertical,
         }
+    }
+}
+
+impl Default for CameraBuilder {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

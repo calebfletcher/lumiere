@@ -103,11 +103,11 @@ impl Vec3 {
 }
 
 trait IsClose {
-    fn is_close(self, other: Self) -> bool;
+    fn is_close(&self, other: Self) -> bool;
 }
 
 impl IsClose for f64 {
-    fn is_close(self, other: Self) -> bool {
+    fn is_close(&self, other: Self) -> bool {
         let rt = 1e-05;
         let at = 1e-08;
 

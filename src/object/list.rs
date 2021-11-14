@@ -19,13 +19,19 @@ impl HittableList {
     }
 }
 
+impl Default for HittableList {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Hittable for HittableList {
     fn hit(&self, r: &ray::Ray, ray_t: &interval::Interval) -> Option<super::HitRecord> {
         let mut closest_so_far = ray_t.max;
         let mut hitrec = None;
         for object in &self.0 {
             let new_interval = interval::Interval::new(ray_t.min, closest_so_far);
-            if let Some(temp_hitrec) = object.hit(&r, &new_interval) {
+            if let Some(temp_hitrec) = object.hit(r, &new_interval) {
                 closest_so_far = temp_hitrec.t;
                 hitrec = Some(temp_hitrec);
             }

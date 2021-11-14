@@ -56,7 +56,7 @@ impl Scene {
                 pixel_colour /= self.samples_per_pixel as f64;
 
                 let pixel_offset = row * self.image_width * 3 + col * 3;
-                pixel_buffer[pixel_offset + 0] = (pixel_colour.x.sqrt() * 255.999) as u8;
+                pixel_buffer[pixel_offset] = (pixel_colour.x.sqrt() * 255.999) as u8;
                 pixel_buffer[pixel_offset + 1] = (pixel_colour.y.sqrt() * 255.999) as u8;
                 pixel_buffer[pixel_offset + 2] = (pixel_colour.z.sqrt() * 255.999) as u8;
             }
@@ -67,7 +67,7 @@ impl Scene {
     }
 
     fn ray_colour(&self, r: &Ray, depth: usize, rng: &mut rngs::ThreadRng) -> Colour {
-        if depth <= 0 {
+        if depth == 0 {
             return Colour::new(0., 0., 0.);
         }
         match self

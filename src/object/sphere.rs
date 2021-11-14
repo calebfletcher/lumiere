@@ -51,7 +51,7 @@ impl object::Hittable for Sphere {
         let intersection = r.at(root);
         let outward_normal = (intersection - self.centre) / self.radius;
         let mut hitrec = object::HitRecord::new(intersection, outward_normal, root, &self.mat);
-        hitrec.set_face_normal(&r, outward_normal);
+        hitrec.set_face_normal(r, outward_normal);
         Some(hitrec)
     }
 
