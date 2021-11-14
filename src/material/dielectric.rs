@@ -28,9 +28,16 @@ impl Material for Dielectric {
         };
 
         let unit_direction = r.direction.unit();
-        let refracted = unit_direction.refract(hitrec.normal.unit(), refraction_ratio);
 
-        let scattered = Ray::new(hitrec.point, refracted);
+        let cos_theta = (-unit_direction).dot(hitrec.normal).min(1.);
+        let sin_theta = (1. - cos_theta.powi(2)).sqrt();
+
+        let cannot_refract = refraction_ratio * sin_theta > 1.0;
+        let direction = match cannot_refract {
+            true => unit_direction.reflect(&hitrec.normal.unit()),
+            false => unit_direction.refract(&hitrec.normal.unit(), refraction_ratio),
+        };
+        let scattered = Ray::new(hitrec.point, direction);
         MaterialScatterResult::new(Behaviour::Scatter, attenuation, scattered)
     }
 }

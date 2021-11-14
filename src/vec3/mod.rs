@@ -90,10 +90,10 @@ impl Vec3 {
 
     /// Refracts a vector based on a surface normal and a ratio of etas.
     /// Both vectors must be unit vectors.
-    pub fn refract(&self, normal: Self, etai_over_etat: f64) -> Self {
-        let cos_theta = (-*self).dot(normal).min(1.);
-        let r_out_perp = (*self + normal * cos_theta) * etai_over_etat;
-        let r_out_parallel = normal * -(1. - r_out_perp.length_squared()).abs().sqrt();
+    pub fn refract(&self, normal: &Self, etai_over_etat: f64) -> Self {
+        let cos_theta = (-*self).dot(*normal).min(1.);
+        let r_out_perp = (*self + *normal * cos_theta) * etai_over_etat;
+        let r_out_parallel = *normal * -(1. - r_out_perp.length_squared()).abs().sqrt();
         r_out_perp + r_out_parallel
     }
 
@@ -158,7 +158,7 @@ mod tests {
         let v = Vec3::new(2., -1., 1.).unit();
         let n = Vec3::new(0., 1., 0.).unit();
 
-        let res = v.refract(n, 1.);
+        let res = v.refract(&n, 1.);
         let expected = v;
 
         assert!(res.is_close(&expected));
@@ -169,7 +169,7 @@ mod tests {
         let v = Vec3::new(2., -1., 1.).unit();
         let n = Vec3::new(0., 1., 0.).unit();
 
-        let res = v.refract(n, 1.5).unit();
+        let res = v.refract(&n, 1.5).unit();
 
         dbg!(v, res);
 
@@ -187,7 +187,7 @@ mod tests {
         let v = Vec3::new(0., -1., 0.).unit();
         let n = Vec3::new(0., 1., 0.).unit();
 
-        let res = v.refract(n, 1.5).unit();
+        let res = v.refract(&n, 1.5).unit();
 
         // Slows down in x and z, so y component gets bigger
         assert!(v.x * res.x > 0.); // Sign of z should be preserved
