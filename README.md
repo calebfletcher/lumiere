@@ -10,3 +10,4 @@ Angular commit messages, with the following topics:
  - camera
  - material
  - world
+ - math

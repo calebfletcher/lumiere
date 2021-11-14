@@ -2,15 +2,23 @@ use crate::{material, ray::Ray, Point3};
 
 use super::object;
 
+#[derive(Debug)]
 pub struct Sphere {
+    name: String,
     centre: Point3,
     radius: f64,
     mat: Box<dyn material::Material>,
 }
 
 impl Sphere {
-    pub fn new(centre: Point3, radius: f64, mat: Box<dyn material::Material>) -> Self {
+    pub fn new(
+        name: String,
+        centre: Point3,
+        radius: f64,
+        mat: Box<dyn material::Material>,
+    ) -> Self {
         Self {
+            name,
             centre,
             radius,
             mat,
@@ -45,5 +53,9 @@ impl object::Hittable for Sphere {
         let mut hitrec = object::HitRecord::new(intersection, outward_normal, root, &self.mat);
         hitrec.set_face_normal(&r, outward_normal);
         Some(hitrec)
+    }
+
+    fn name(&self) -> String {
+        self.name.clone()
     }
 }

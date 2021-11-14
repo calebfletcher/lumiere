@@ -24,7 +24,7 @@ impl Material for Metal {
         hitrec: &HitRecord,
         rng: &mut rand::rngs::ThreadRng,
     ) -> MaterialScatterResult {
-        let reflected = r.direction.unit().reflect(hitrec.normal);
+        let reflected = r.direction.unit().reflect(&hitrec.normal);
         let scattered = Ray::new(
             hitrec.point,
             reflected + Vec3::random_in_unit_sphere(rng) * self.fuzziness,

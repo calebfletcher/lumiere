@@ -1,10 +1,14 @@
+use std::fmt;
+
 use crate::{object::HitRecord, ray::Ray, Colour};
 
+#[derive(Debug)]
 pub enum Behaviour {
     Scatter,
     Absorb,
 }
 
+#[derive(Debug)]
 pub struct MaterialScatterResult {
     pub behaviour: Behaviour,
     pub attenuation: Colour,
@@ -21,7 +25,7 @@ impl MaterialScatterResult {
     }
 }
 
-pub trait Material {
+pub trait Material: fmt::Debug {
     fn scatter(
         &self,
         r: &Ray,

@@ -2,6 +2,7 @@ use crate::ray;
 
 use super::Hittable;
 
+#[derive(Debug)]
 pub struct HittableList(Vec<Box<dyn Hittable>>);
 
 impl HittableList {
@@ -32,5 +33,9 @@ impl Hittable for HittableList {
         }
 
         hitrec
+    }
+
+    fn name(&self) -> String {
+        String::from("world")
     }
 }
