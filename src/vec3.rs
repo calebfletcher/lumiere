@@ -78,6 +78,15 @@ impl Vec3 {
             }
         }
     }
+
+    pub fn near_zero(&self) -> bool {
+        let threshold = 1e-8;
+        self.length_squared() < threshold
+    }
+
+    pub fn reflect(&self, normal: Self) -> Self {
+        *self - normal * self.dot(normal) * 2.
+    }
 }
 
 impl Index<usize> for Vec3 {

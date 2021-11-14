@@ -43,7 +43,6 @@ impl CameraBuilder {
             upper_left_corner: upper_left_corner,
             horizontal: horizontal,
             vertical: vertical,
-            aspect_ratio: self.aspect_ratio,
         }
     }
 }
@@ -53,7 +52,6 @@ pub struct Camera {
     upper_left_corner: Point3,
     horizontal: Vec3,
     vertical: Vec3,
-    aspect_ratio: f64,
 }
 
 impl Camera {

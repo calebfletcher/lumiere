@@ -6,24 +6,46 @@ use std::{
 
 use rand::Rng;
 
-use lumiere::{camera, image, object, ray_colour, Colour, Point3};
+use lumiere::{camera, image, material, object, ray_colour, Colour, Point3};
 
 fn main() -> Result<(), Box<dyn Error>> {
     let mut rng = rand::thread_rng();
 
     // Image
     const ASPECT_RATIO: f64 = 16. / 9.;
-    const IMAGE_WIDTH: usize = 1200;
+    const IMAGE_WIDTH: usize = 900;
     const IMAGE_HEIGHT: usize = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as usize;
-    let samples_per_pixel: usize = 100;
+    let samples_per_pixel: usize = 1000;
     let max_depth = 50;
+
+    let material_ground = Box::new(material::Lambertian::new(Colour::new(0.8, 0.8, 0.0)));
+    let material_centre = Box::new(material::Lambertian::new(Colour::new(0.7, 0.3, 0.3)));
+    let material_left = Box::new(material::Metal::new(Colour::new(0.8, 0.8, 0.8)));
+    let material_right = Box::new(material::Metal::new(Colour::new(0.8, 0.6, 0.2)));
 
     // World
     let mut world = object::HittableList::new();
-    world.add(Box::new(object::Sphere::new(Point3::new(0., 0., -1.), 0.5)));
+
+    // Objects
     world.add(Box::new(object::Sphere::new(
-        Point3::new(0., -100.5, 0.),
+        Point3::new(0., -100.5, -1.),
         100.,
+        material_ground,
+    )));
+    world.add(Box::new(object::Sphere::new(
+        Point3::new(0., 0., -1.),
+        0.5,
+        material_centre,
+    )));
+    world.add(Box::new(object::Sphere::new(
+        Point3::new(-1., 0., -1.),
+        0.5,
+        material_left,
+    )));
+    world.add(Box::new(object::Sphere::new(
+        Point3::new(1., 0., -1.),
+        0.5,
+        material_right,
     )));
 
     // Camera

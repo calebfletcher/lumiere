@@ -1,15 +1,20 @@
-use crate::{ray::Ray, Point3};
+use crate::{material, ray::Ray, Point3};
 
 use super::object;
 
 pub struct Sphere {
     centre: Point3,
     radius: f64,
+    mat: Box<dyn material::Material>,
 }
 
 impl Sphere {
-    pub fn new(centre: Point3, radius: f64) -> Self {
-        Self { centre, radius }
+    pub fn new(centre: Point3, radius: f64, mat: Box<dyn material::Material>) -> Self {
+        Self {
+            centre,
+            radius,
+            mat,
+        }
     }
 }
 
@@ -37,7 +42,7 @@ impl object::Hittable for Sphere {
 
         let intersection = r.at(root);
         let outward_normal = (intersection - self.centre) / self.radius;
-        let mut hitrec = object::HitRecord::new(intersection, outward_normal, root);
+        let mut hitrec = object::HitRecord::new(intersection, outward_normal, root, &self.mat);
         hitrec.set_face_normal(&r, outward_normal);
         Some(hitrec)
     }
