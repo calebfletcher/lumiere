@@ -3,12 +3,9 @@ use std::io::{self, BufWriter};
 use std::path::Path;
 
 pub fn write_image<P: AsRef<Path>, const WIDTH: usize, const HEIGHT: usize>(
-    pixels: &[u8; 3 * WIDTH * HEIGHT],
+    pixels: &Vec<u8>,
     path: P,
-) -> Result<(), io::Error>
-where
-    [(); WIDTH * HEIGHT * 3]: Sized,
-{
+) -> Result<(), io::Error> {
     // Create the file
     let file = File::create(path)?;
     let w = BufWriter::new(file);

@@ -65,7 +65,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // Pixel array as height * rows * channels 8 bit values
     const BUFFER_LENGTH: usize = 3 * IMAGE_WIDTH * IMAGE_HEIGHT;
-    let mut pixels = [0_u8; BUFFER_LENGTH];
+    let mut pixels = vec![0_u8; BUFFER_LENGTH];
 
     let scene = Scene::new(
         world,
