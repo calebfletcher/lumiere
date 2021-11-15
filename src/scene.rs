@@ -82,7 +82,6 @@ impl Scene {
                     Behaviour::Scatter => {
                         scatter_result.attenuation
                             * self.ray_colour(&scatter_result.scattered, depth - 1, rng)
-                            * 0.5
                     }
                     Behaviour::Absorb => Colour::new(0., 0., 0.),
                 }
