@@ -39,7 +39,7 @@ impl Scene {
         }
     }
 
-    pub fn render(&self, pixel_buffer: &mut [u8], rng: &mut rngs::ThreadRng) -> io::Result<()> {
+    pub fn render(&self, pixel_buffer: &mut Vec<u8>, rng: &mut rngs::ThreadRng) -> io::Result<()> {
         let total_rays = self.image_height * self.image_width * self.samples_per_pixel;
         let pb = ProgressBar::new(total_rays as u64);
         pb.set_style(ProgressStyle::default_bar()
