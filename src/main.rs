@@ -12,45 +12,54 @@ fn main() -> Result<(), Box<dyn Error>> {
     let samples_per_pixel: usize = 100;
     let max_depth = 50;
 
-    let material_ground = Box::new(material::Lambertian::new(Colour::new(0.8, 0.8, 0.0)));
-    let material_centre = Box::new(material::Dielectric::new(1.5));
-    let material_left = Box::new(material::Dielectric::new(1.5));
-    let material_right = Box::new(material::Metal::new(Colour::new(0.8, 0.6, 0.2), 1.0));
+    // Camera
+    let camera = camera::CameraBuilder::new()
+        .origin(Point3::new(-2., 2., 1.))
+        .look_dir(Point3::new(2., -2., -2.))
+        .focal_length(1.)
+        .fov(90.)
+        .build();
 
     // World
     let mut world = object::HittableList::new();
 
+    // Materials
+    let material_ground = Box::new(material::Lambertian::new(Colour::new(0.8, 0.8, 0.)));
+    let material_centre = Box::new(material::Lambertian::new(Colour::new(0.1, 0.2, 0.5)));
+    let material_left = Box::new(material::Dielectric::new(1.5));
+    let material_right = Box::new(material::Metal::new(Colour::new(0.8, 0.6, 0.2), 0.));
+
     // Objects
     world.add(Box::new(object::Sphere::new(
-        String::from("surface"),
+        String::from("ball other"),
         Point3::new(0., -100.5, -1.),
         100.,
         material_ground,
     )));
     world.add(Box::new(object::Sphere::new(
-        String::from("glass ball"),
+        String::from("rear ball"),
         Point3::new(0., 0., -1.),
         0.5,
         material_centre,
     )));
     world.add(Box::new(object::Sphere::new(
-        String::from("ball other"),
+        String::from("ball other1"),
         Point3::new(-1., 0., -1.),
         0.5,
+        material_left.clone(),
+    )));
+    world.add(Box::new(object::Sphere::new(
+        String::from("ball other2"),
+        Point3::new(-1., 0., -1.),
+        -0.4,
         material_left,
     )));
     world.add(Box::new(object::Sphere::new(
         String::from("rear ball"),
-        Point3::new(5., 0., -10.),
-        3.5,
+        Point3::new(1., 0., -1.),
+        0.5,
         material_right,
     )));
-
-    // Camera
-    let camera = camera::CameraBuilder::new()
-        .origin(Point3::new(0., 0., 0.))
-        .focal_length(1.)
-        .build();
 
     // Pixel array as height * rows * channels 8 bit values
     const BUFFER_LENGTH: usize = 3 * IMAGE_WIDTH * IMAGE_HEIGHT;
