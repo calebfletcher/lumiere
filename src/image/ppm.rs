@@ -3,9 +3,12 @@ use std::io::{self, Write};
 use std::path::Path;
 
 pub fn write_image<P: AsRef<Path>, const WIDTH: usize, const HEIGHT: usize>(
-    pixels: [[[u8; 3]; WIDTH]; HEIGHT],
+    pixels: &[u8; 3 * WIDTH * HEIGHT],
     path: P,
-) -> Result<(), io::Error> {
+) -> Result<(), io::Error>
+where
+    [(); WIDTH * HEIGHT * 3]: Sized,
+{
     let max_value: u64 = 255;
 
     // Create the file
@@ -16,10 +19,8 @@ pub fn write_image<P: AsRef<Path>, const WIDTH: usize, const HEIGHT: usize>(
     file.write_all(format!("{} {}\n", WIDTH, HEIGHT).as_bytes())?;
     file.write_all(format!("{}\n", max_value).as_bytes())?;
 
-    for row in pixels {
-        for pixel in row {
-            file.write_all(format!("{} {} {}\n", pixel[0], pixel[1], pixel[2]).as_bytes())?
-        }
+    for pixel in pixels.chunks_exact(3) {
+        file.write_all(format!("{} {} {}\n", pixel[0], pixel[1], pixel[2]).as_bytes())?
     }
 
     Ok(())
