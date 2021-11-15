@@ -1,66 +1,112 @@
 use std::{error::Error, path::Path};
 
 use lumiere::{camera, image, material, object, scene::Scene, Colour, Point3};
+use rand::Rng;
 
 fn main() -> Result<(), Box<dyn Error>> {
     let mut rng = rand::thread_rng();
 
     // Image
     const ASPECT_RATIO: f64 = 16. / 9.;
-    const IMAGE_WIDTH: usize = 600;
+    const IMAGE_WIDTH: usize = 900;
     const IMAGE_HEIGHT: usize = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as usize;
     let samples_per_pixel: usize = 100;
     let max_depth = 50;
 
     // Camera
-    let camera_look_dir = Point3::new(-3., -3., -3.);
+    let camera_look_dir = Point3::new(-13., -2., -3.);
     let camera = camera::CameraBuilder::new()
-        .origin(Point3::new(3., 3., 2.))
+        .origin(Point3::new(13., 2., 3.))
         .look_dir(camera_look_dir)
-        .fov(40.)
-        .aperture(0.3)
-        .focus_dist(camera_look_dir.length())
+        .fov(20.)
+        .aperture(0.1)
+        .focus_dist(10.)
         .build();
 
     // World
     let mut world = object::HittableList::new();
 
-    // Materials
-    let material_ground = Box::new(material::Lambertian::new(Colour::new(0.8, 0.8, 0.)));
-    let material_centre = Box::new(material::Lambertian::new(Colour::new(0.1, 0.2, 0.5)));
-    let material_left = Box::new(material::Dielectric::new(1.5));
-    let material_right = Box::new(material::Metal::new(Colour::new(0.8, 0.6, 0.2), 0.));
-
-    // Objects
+    // Ground
+    let material_ground = Box::new(material::Lambertian::new(Colour::new(0.5, 0.5, 0.5)));
     world.add(Box::new(object::Sphere::new(
-        String::from("ball other"),
-        Point3::new(0., -100.5, -1.),
-        100.,
+        "ground".to_string(),
+        Point3::new(0., -1000., 0.),
+        1000.,
         material_ground,
     )));
+
+    // Random small balls
+    for a in -11..11 {
+        for b in -11..11 {
+            let choose_mat: f64 = rng.gen();
+            let centre = Point3::new(
+                a as f64 + 0.9 * choose_mat,
+                0.2,
+                b as f64 + 0.9 * choose_mat,
+            );
+
+            if (centre - Point3::new(4., 0.2, 0.)).length() > 0.9 {
+                match choose_mat {
+                    a if a < 0.8 => {
+                        // diffuse
+                        let albedo = Colour::random_in_range_inclusive(&mut rng, 0.0..=1.0);
+                        let sphere_material = material::Lambertian::new(albedo);
+                        world.add(Box::new(object::Sphere::new(
+                            "".to_string(),
+                            centre,
+                            0.2,
+                            Box::new(sphere_material),
+                        )));
+                    }
+                    a if a < 0.95 => {
+                        // metal
+                        let albedo = Colour::random_in_range_inclusive(&mut rng, 0.5..=1.0);
+                        let fuzziness: f64 = rng.gen_range(0.0..0.5);
+                        let sphere_material = material::Metal::new(albedo, fuzziness);
+                        world.add(Box::new(object::Sphere::new(
+                            "".to_string(),
+                            centre,
+                            0.2,
+                            Box::new(sphere_material),
+                        )));
+                    }
+                    _ => {
+                        // glass
+                        let sphere_material = material::Dielectric::new(1.5);
+                        world.add(Box::new(object::Sphere::new(
+                            "".to_string(),
+                            centre,
+                            0.2,
+                            Box::new(sphere_material),
+                        )));
+                    }
+                }
+            }
+        }
+    }
+
+    let material_1 = Box::new(material::Dielectric::new(1.5));
     world.add(Box::new(object::Sphere::new(
-        String::from("rear ball"),
-        Point3::new(0., 0., -1.),
-        0.5,
-        material_centre,
+        "obj1".to_string(),
+        Point3::new(0., 1., 0.),
+        1.,
+        material_1,
     )));
+
+    let material_2 = Box::new(material::Lambertian::new(Colour::new(0.4, 0.2, 0.1)));
     world.add(Box::new(object::Sphere::new(
-        String::from("ball other1"),
-        Point3::new(-1., 0., -1.),
-        0.5,
-        material_left.clone(),
+        "obj2".to_string(),
+        Point3::new(-4., 1., 0.),
+        1.,
+        material_2,
     )));
+
+    let material_3 = Box::new(material::Metal::new(Colour::new(0.7, 0.6, 0.5), 0.0));
     world.add(Box::new(object::Sphere::new(
-        String::from("ball other2"),
-        Point3::new(-1., 0., -1.),
-        -0.4,
-        material_left,
-    )));
-    world.add(Box::new(object::Sphere::new(
-        String::from("rear ball"),
-        Point3::new(1., 0., -1.),
-        0.5,
-        material_right,
+        "obj3".to_string(),
+        Point3::new(4., 1., 0.),
+        1.,
+        material_3,
     )));
 
     // Pixel array as height * rows * channels 8 bit values
