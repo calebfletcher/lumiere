@@ -11,3 +11,4 @@ license = "MIT"
 [dependencies]
 rand = "0.8.4"
 png = "0.17.2"
+indicatif = "0.16.2"
