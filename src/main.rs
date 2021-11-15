@@ -13,11 +13,13 @@ fn main() -> Result<(), Box<dyn Error>> {
     let max_depth = 50;
 
     // Camera
+    let camera_look_dir = Point3::new(-3., -3., -3.);
     let camera = camera::CameraBuilder::new()
-        .origin(Point3::new(-2., 2., 1.))
-        .look_dir(Point3::new(2., -2., -2.))
-        .focal_length(1.)
-        .fov(90.)
+        .origin(Point3::new(3., 3., 2.))
+        .look_dir(camera_look_dir)
+        .fov(40.)
+        .aperture(0.3)
+        .focus_dist(camera_look_dir.length())
         .build();
 
     // World

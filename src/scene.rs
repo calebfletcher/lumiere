@@ -50,7 +50,7 @@ impl Scene {
                 for _ in 0..self.samples_per_pixel {
                     let u = (col as f64 + rng.gen::<f64>()) / (self.image_width - 1) as f64;
                     let v = (row as f64 + rng.gen::<f64>()) / (self.image_height - 1) as f64;
-                    let r = self.camera.get_ray(u, v);
+                    let r = self.camera.get_ray(u, v, rng);
                     pixel_colour += self.ray_colour(&r, self.max_depth, rng);
                 }
                 pixel_colour /= self.samples_per_pixel as f64;
