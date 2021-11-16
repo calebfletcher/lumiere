@@ -16,7 +16,7 @@ impl Lambertian {
 impl Material for Lambertian {
     fn scatter(
         &self,
-        _r: &Ray,
+        r: &Ray,
         hitrec: &HitRecord,
         rng: &mut rand::rngs::ThreadRng,
     ) -> MaterialScatterResult {
@@ -29,7 +29,7 @@ impl Material for Lambertian {
         MaterialScatterResult::new(
             Behaviour::Scatter,
             self.albedo,
-            Ray::new(hitrec.point, scatter_direction),
+            Ray::new(hitrec.point, scatter_direction, r.time),
         )
     }
 }

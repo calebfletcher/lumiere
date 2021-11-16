@@ -19,7 +19,7 @@ fn main() {
 
     let origin = Vec3::new(0., -0.3, 0.);
     let direction = Vec3::new(1., 0., 0.);
-    let ray = Ray::new(origin, direction);
+    let ray = Ray::new(origin, direction, 0.);
 
     println!("iter 1");
     let hitrec = sphere

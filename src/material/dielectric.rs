@@ -45,7 +45,7 @@ impl Material for Dielectric {
             true => unit_direction.reflect(&hitrec.normal.unit()),
             false => unit_direction.refract(&hitrec.normal.unit(), refraction_ratio),
         };
-        let scattered = Ray::new(hitrec.point, direction);
+        let scattered = Ray::new(hitrec.point, direction, r.time);
         MaterialScatterResult::new(Behaviour::Scatter, attenuation, scattered)
     }
 }

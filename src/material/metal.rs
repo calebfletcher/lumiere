@@ -28,6 +28,7 @@ impl Material for Metal {
         let scattered = Ray::new(
             hitrec.point,
             reflected + Vec3::random_in_unit_sphere(rng) * self.fuzziness,
+            r.time,
         );
         let behaviour = match scattered.direction.dot(hitrec.normal) {
             d if d > 0. => Behaviour::Scatter,

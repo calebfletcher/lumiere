@@ -1,6 +1,6 @@
-use rand::rngs;
+use rand::{rngs, Rng};
 
-use crate::{ray, vec3::Vec3, Point3};
+use crate::{ray::Ray, vec3::Vec3, Point3};
 
 pub struct CameraBuilder {
     origin: Point3,
@@ -107,12 +107,13 @@ pub struct Camera {
 }
 
 impl Camera {
-    pub fn get_ray(&self, s: f64, t: f64, rng: &mut rngs::ThreadRng) -> ray::Ray {
+    pub fn get_ray(&self, s: f64, t: f64, rng: &mut rngs::ThreadRng) -> Ray {
         let rd = Vec3::random_in_unit_disk(rng) * self.lens_radius;
         let offset = self.u * rd.x + self.v * rd.y;
-        ray::Ray::new(
+        Ray::new(
             self.origin + offset,
             self.upper_left_corner + self.horizontal * s - self.vertical * t - self.origin - offset,
+            rng.gen(),
         )
     }
 

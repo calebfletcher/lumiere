@@ -1,6 +1,6 @@
 use std::{error::Error, path::Path};
 
-use lumiere::{camera, image, material, object, scene::Scene, Colour, Point3};
+use lumiere::{camera, image, material, object, scene::Scene, vec3::Vec3, Colour, Point3};
 use rand::Rng;
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -51,9 +51,11 @@ fn main() -> Result<(), Box<dyn Error>> {
                         // diffuse
                         let albedo = Colour::random_in_range_inclusive(&mut rng, 0.0..=1.0);
                         let sphere_material = material::Lambertian::new(albedo);
-                        world.add(Box::new(object::Sphere::new(
+                        let centre_1 = centre + Vec3::new(0., rng.gen_range(0.0..=0.5), 0.);
+                        world.add(Box::new(object::MovingSphere::new(
                             "".to_string(),
                             centre,
+                            centre_1,
                             0.2,
                             Box::new(sphere_material),
                         )));
