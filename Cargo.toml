@@ -1,6 +1,6 @@
 [package]
 name = "lumiere"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 description = "A ray-tracing implementation in Rust, based on Peter Shirley's \"Ray Tracing in One Weekend\" series."
 repository = "https://github.com/calebfletcher/lumiere"
