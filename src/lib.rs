@@ -1,6 +1,8 @@
 #![allow(incomplete_features)]
 #![feature(generic_const_exprs)]
 
+pub mod aabb;
+pub mod bvh;
 pub mod camera;
 pub mod image;
 pub mod interval;

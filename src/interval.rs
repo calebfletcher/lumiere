@@ -1,3 +1,4 @@
+#[derive(Debug, Clone, Copy)]
 pub struct Interval {
     pub min: f64,
     pub max: f64,
@@ -10,10 +11,22 @@ impl Interval {
         Self { min, max }
     }
 
+    pub fn from_intervals(a: &Self, b: &Self) -> Self {
+        Self {
+            min: a.min.min(b.min),
+            max: a.max.max(b.max),
+        }
+    }
+
     /// Checks whether a given value is between the minimum and maximum values
     /// of the interval.
     pub fn contains(&self, x: f64) -> bool {
         x >= self.min && x <= self.max
+    }
+
+    pub fn expand(&self, delta: f64) -> Self {
+        let padding = delta / 2.;
+        Self::new(self.min - padding, self.max + padding)
     }
 }
 

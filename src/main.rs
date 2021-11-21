@@ -1,18 +1,92 @@
 use std::{error::Error, path::Path};
 
-use lumiere::{camera, image, material, object, scene::Scene, vec3::Vec3, Colour, Point3};
-use rand::Rng;
+use lumiere::{bvh::BVHNode, camera, image, material, object, scene::Scene, Colour, Point3};
+use rand::{rngs, Rng};
 
 fn main() -> Result<(), Box<dyn Error>> {
     let mut rng = rand::thread_rng();
 
-    // Image
+    // Image parameters
     const ASPECT_RATIO: f64 = 16. / 9.;
-    const IMAGE_WIDTH: usize = 900;
+    const IMAGE_WIDTH: usize = 3840;
     const IMAGE_HEIGHT: usize = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as usize;
-    let samples_per_pixel: usize = 100;
+    let samples_per_pixel: usize = 500;
     let max_depth = 50;
 
+    // Pixel array as height * rows * channels 8 bit values
+    const BUFFER_LENGTH: usize = 3 * IMAGE_WIDTH * IMAGE_HEIGHT;
+    let mut pixels = vec![0_u8; BUFFER_LENGTH];
+
+    // Generate the objects
+    let (camera, world) = example_complex_scene(&mut rng);
+
+    // Generate BVH tree
+    let mut bvh_root = object::HittableList::new();
+    bvh_root.add(Box::new(BVHNode::new(world, &mut rng)));
+
+    // Create scene
+    let scene = Scene::new(
+        bvh_root,
+        camera,
+        max_depth,
+        samples_per_pixel,
+        IMAGE_WIDTH,
+        IMAGE_HEIGHT,
+    );
+
+    // Render the scene to a frame buffer
+    scene.render(&mut pixels, &mut rng)?;
+
+    // Write the frame buffer to a file
+    image::png::write_image::<&Path, IMAGE_WIDTH, IMAGE_HEIGHT>(&pixels, Path::new("image.png"))?;
+    eprintln!("Saved image");
+
+    Ok(())
+}
+
+pub fn example_basic_scene(_rng: &mut rngs::ThreadRng) -> (camera::Camera, object::HittableList) {
+    // Camera
+    let camera_look_dir = Point3::new(-13., -2., -3.);
+    let camera = camera::CameraBuilder::new()
+        .origin(Point3::new(13., 2., 3.))
+        .look_dir(camera_look_dir)
+        .fov(20.)
+        .aperture(0.1)
+        .focus_dist(10.)
+        .build();
+
+    // World
+    let mut world = object::HittableList::new();
+
+    // Ground
+    let material_ground = Box::new(material::Lambertian::new(Colour::new(0.5, 0.5, 0.5)));
+    world.add(Box::new(object::Sphere::new(
+        "ground".to_string(),
+        Point3::new(0., -1000., 0.),
+        1000.,
+        material_ground,
+    )));
+
+    let material_3 = Box::new(material::Metal::new(Colour::new(0.7, 0.6, 0.5), 0.0));
+    world.add(Box::new(object::Sphere::new(
+        "obj3".to_string(),
+        Point3::new(4., 1., 0.),
+        1.,
+        material_3,
+    )));
+
+    let material_4 = Box::new(material::Lambertian::new(Colour::new(0.7, 0.1, 0.5)));
+    world.add(Box::new(object::Sphere::new(
+        "obj4".to_string(),
+        Point3::new(7., 1., 0.),
+        0.4,
+        material_4,
+    )));
+
+    (camera, world)
+}
+
+pub fn example_complex_scene(rng: &mut rngs::ThreadRng) -> (camera::Camera, object::HittableList) {
     // Camera
     let camera_look_dir = Point3::new(-13., -2., -3.);
     let camera = camera::CameraBuilder::new()
@@ -49,9 +123,9 @@ fn main() -> Result<(), Box<dyn Error>> {
                 match choose_mat {
                     a if a < 0.8 => {
                         // diffuse
-                        let albedo = Colour::random_in_range_inclusive(&mut rng, 0.0..=1.0);
+                        let albedo = Colour::random_in_range_inclusive(rng, 0.0..=1.0);
                         let sphere_material = material::Lambertian::new(albedo);
-                        let centre_1 = centre + Vec3::new(0., rng.gen_range(0.0..=0.5), 0.);
+                        let centre_1 = centre; // + Vec3::new(0., rng.gen_range(0.0..=0.5), 0.);
                         world.add(Box::new(object::MovingSphere::new(
                             "".to_string(),
                             centre,
@@ -62,7 +136,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                     }
                     a if a < 0.95 => {
                         // metal
-                        let albedo = Colour::random_in_range_inclusive(&mut rng, 0.5..=1.0);
+                        let albedo = Colour::random_in_range_inclusive(rng, 0.5..=1.0);
                         let fuzziness: f64 = rng.gen_range(0.0..0.5);
                         let sphere_material = material::Metal::new(albedo, fuzziness);
                         world.add(Box::new(object::Sphere::new(
@@ -111,23 +185,5 @@ fn main() -> Result<(), Box<dyn Error>> {
         material_3,
     )));
 
-    // Pixel array as height * rows * channels 8 bit values
-    const BUFFER_LENGTH: usize = 3 * IMAGE_WIDTH * IMAGE_HEIGHT;
-    let mut pixels = vec![0_u8; BUFFER_LENGTH];
-
-    let scene = Scene::new(
-        world,
-        camera,
-        max_depth,
-        samples_per_pixel,
-        IMAGE_WIDTH,
-        IMAGE_HEIGHT,
-    );
-
-    scene.render(&mut pixels, &mut rng)?;
-
-    image::png::write_image::<&Path, IMAGE_WIDTH, IMAGE_HEIGHT>(&pixels, Path::new("image.png"))?;
-    eprintln!("Saved image");
-
-    Ok(())
+    (camera, world)
 }

@@ -1,4 +1,4 @@
-use crate::{interval, material, ray::Ray, vec3::Vec3, Point3};
+use crate::{aabb::AABB, interval, material, ray::Ray, vec3::Vec3, Point3};
 
 use super::object;
 
@@ -11,6 +11,7 @@ pub struct MovingSphere {
     centre_vec: Vec3,
     radius: f64,
     mat: Box<dyn material::Material>,
+    aabb: AABB,
 }
 
 impl MovingSphere {
@@ -21,6 +22,10 @@ impl MovingSphere {
         radius: f64,
         mat: Box<dyn material::Material>,
     ) -> Self {
+        let rvec = Vec3::new(radius, radius, radius);
+        let box0 = AABB::from_points(centre_0 - rvec, centre_0 + rvec);
+        let box1 = AABB::from_points(centre_1 - rvec, centre_1 + rvec);
+
         Self {
             name,
             centre_0,
@@ -28,6 +33,7 @@ impl MovingSphere {
             centre_vec: centre_1 - centre_0,
             radius,
             mat,
+            aabb: AABB::from_boxes(&box0, &box1),
         }
     }
 
@@ -67,5 +73,9 @@ impl object::Hittable for MovingSphere {
 
     fn name(&self) -> String {
         self.name.clone()
+    }
+
+    fn bounding_box(&self) -> &AABB {
+        &self.aabb
     }
 }

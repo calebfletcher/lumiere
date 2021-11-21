@@ -1,4 +1,4 @@
-use crate::{interval, material, ray::Ray, Point3};
+use crate::{aabb::AABB, interval, material, ray::Ray, vec3::Vec3, Point3};
 
 use super::object;
 
@@ -8,6 +8,7 @@ pub struct Sphere {
     centre: Point3,
     radius: f64,
     mat: Box<dyn material::Material>,
+    aabb: AABB,
 }
 
 impl Sphere {
@@ -17,11 +18,14 @@ impl Sphere {
         radius: f64,
         mat: Box<dyn material::Material>,
     ) -> Self {
+        let rvec = Vec3::new(radius, radius, radius);
+        let aabb = AABB::from_points(centre - rvec, centre + rvec);
         Self {
             name,
             centre,
             radius,
             mat,
+            aabb,
         }
     }
 }
@@ -57,5 +61,9 @@ impl object::Hittable for Sphere {
 
     fn name(&self) -> String {
         self.name.clone()
+    }
+
+    fn bounding_box(&self) -> &AABB {
+        &self.aabb
     }
 }
