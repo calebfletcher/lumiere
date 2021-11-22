@@ -1,5 +1,6 @@
 #![allow(incomplete_features)]
 #![feature(generic_const_exprs)]
+#![allow(clippy::borrowed_box, clippy::module_inception)]
 
 pub mod aabb;
 pub mod bvh;

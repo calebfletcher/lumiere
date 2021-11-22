@@ -21,7 +21,7 @@ impl HittableList {
     }
 
     pub fn add(&mut self, object: Box<dyn Hittable>) {
-        self.bbox = AABB::from_boxes(&self.bbox, &object.bounding_box());
+        self.bbox = AABB::from_boxes(&self.bbox, object.bounding_box());
         self.objects.push(object);
     }
 }

@@ -40,7 +40,7 @@ impl BVHNode {
                 if comparator(&el1, &el2) == cmp::Ordering::Greater {
                     (Some(el1), Some(el2))
                 } else {
-                    (Some(el1), Some(el2))
+                    (Some(el2), Some(el1))
                 }
             }
             _ => {
@@ -94,15 +94,12 @@ impl Hittable for BVHNode {
         }
 
         // Check left for hits
-        let hit_left = self.left.as_ref().map_or(None, |b| b.hit(r, ray_t));
+        let hit_left = self.left.as_ref().and_then(|b| b.hit(r, ray_t));
 
         // Check right for hits that are closer than the left's potential hits
         let new_max = hit_left.as_ref().map_or(ray_t.max, |hr| hr.t);
         let new_interval = Interval::new(ray_t.min, new_max);
-        let hit_right = self
-            .right
-            .as_ref()
-            .map_or(None, |b| b.hit(r, &new_interval));
+        let hit_right = self.right.as_ref().and_then(|b| b.hit(r, &new_interval));
 
         // Prioritise hit_right, since it was checked with the reduced interval
         match hit_right {

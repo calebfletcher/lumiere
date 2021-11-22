@@ -3,7 +3,7 @@ use std::io::{self, BufWriter};
 use std::path::Path;
 
 pub fn write_image<P: AsRef<Path>, const WIDTH: usize, const HEIGHT: usize>(
-    pixels: &Vec<u8>,
+    pixels: &[u8],
     path: P,
 ) -> Result<(), io::Error> {
     // Create the file
