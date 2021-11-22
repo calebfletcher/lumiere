@@ -1,3 +1,5 @@
+use std::f64::consts;
+
 use crate::{aabb::AABB, interval, material, ray::Ray, vec3::Vec3, Point3};
 
 use super::object;
@@ -40,6 +42,22 @@ impl MovingSphere {
     fn centre(&self, time: f64) -> Vec3 {
         self.centre_0 + self.centre_vec * time
     }
+
+    /// Calculates the u-v coordinate of a point on a sphere.
+    /// p: a given point on the sphere of radius one, centered at the origin.
+    /// u: returned value [0,1] of angle around the Y axis from X=-1.
+    /// v: returned value [0,1] of angle from Y=-1 to Y=+1.
+    /// <1 0 0> yields <0.50 0.50>       <-1  0  0> yields <0.00 0.50>
+    /// <0 1 0> yields <0.50 1.00>       < 0 -1  0> yields <0.50 0.00>
+    /// <0 0 1> yields <0.25 0.50>       < 0  0 -1> yields <0.75 0.50>
+    fn get_uv(&self, p: Point3) -> (f64, f64) {
+        let theta = (-p.y).acos();
+        let phi = (-p.z).atan2(p.x) + consts::PI;
+        let u = phi / consts::TAU;
+        let v = theta / consts::PI;
+
+        (u, v)
+    }
 }
 
 impl object::Hittable for MovingSphere {
@@ -66,7 +84,9 @@ impl object::Hittable for MovingSphere {
 
         let intersection = r.at(root);
         let outward_normal = (intersection - self.centre(r.time)) / self.radius;
-        let mut hitrec = object::HitRecord::new(intersection, outward_normal, root, &self.mat);
+        let (u, v) = self.get_uv(outward_normal);
+        let mut hitrec =
+            object::HitRecord::new(intersection, outward_normal, root, u, v, &self.mat);
         hitrec.set_face_normal(r, outward_normal);
         Some(hitrec)
     }

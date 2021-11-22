@@ -1,17 +1,19 @@
 use rand::Rng;
 
-use crate::{object::HitRecord, ray::Ray, Colour};
+use crate::{object::HitRecord, ray::Ray, texture::SolidColour, texture::Texture, Colour};
 
 use super::{Behaviour, Material, MaterialScatterResult};
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct Dielectric {
+    attenuation: Box<dyn Texture>,
     ir: f64, // Index of refraction
 }
 
 impl Dielectric {
     pub fn new(ir: f64) -> Self {
-        Self { ir }
+        let attenuation = Box::new(SolidColour::new(Colour::new(1., 1., 1.)));
+        Self { ir, attenuation }
     }
 
     fn reflectance(&self, cosine: f64, ref_idx: f64) -> f64 {
@@ -27,7 +29,6 @@ impl Material for Dielectric {
         hitrec: &HitRecord,
         rng: &mut rand::rngs::ThreadRng,
     ) -> MaterialScatterResult {
-        let attenuation = Colour::new(1., 1., 1.);
         let refraction_ratio = if hitrec.front_face {
             1.0 / self.ir
         } else {
@@ -46,6 +47,11 @@ impl Material for Dielectric {
             false => unit_direction.refract(&hitrec.normal.unit(), refraction_ratio),
         };
         let scattered = Ray::new(hitrec.point, direction, r.time);
-        MaterialScatterResult::new(Behaviour::Scatter, attenuation, scattered)
+        MaterialScatterResult::new(
+            Behaviour::Scatter,
+            self.attenuation
+                .get_value(hitrec.u, hitrec.v, &hitrec.point),
+            scattered,
+        )
     }
 }

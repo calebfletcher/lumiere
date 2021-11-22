@@ -1,15 +1,27 @@
-use crate::{object::HitRecord, ray::Ray, vec3::Vec3, Colour};
+use crate::{
+    object::HitRecord,
+    ray::Ray,
+    texture::{SolidColour, Texture},
+    vec3::Vec3,
+    Colour,
+};
 
 use super::{Behaviour, Material, MaterialScatterResult};
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct Lambertian {
-    albedo: Colour,
+    albedo: Box<dyn Texture>,
 }
 
 impl Lambertian {
-    pub fn new(albedo: Colour) -> Self {
+    pub fn new(albedo: Box<dyn Texture>) -> Self {
         Self { albedo }
+    }
+
+    pub fn from_colour(albedo: Colour) -> Self {
+        Self {
+            albedo: Box::new(SolidColour::new(albedo)),
+        }
     }
 }
 
@@ -28,7 +40,7 @@ impl Material for Lambertian {
 
         MaterialScatterResult::new(
             Behaviour::Scatter,
-            self.albedo,
+            self.albedo.get_value(hitrec.u, hitrec.v, &hitrec.point),
             Ray::new(hitrec.point, scatter_direction, r.time),
         )
     }

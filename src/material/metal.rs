@@ -1,10 +1,16 @@
-use crate::{object::HitRecord, ray::Ray, vec3::Vec3, Colour};
+use crate::{
+    object::HitRecord,
+    ray::Ray,
+    texture::{SolidColour, Texture},
+    vec3::Vec3,
+    Colour,
+};
 
 use super::{Behaviour, Material, MaterialScatterResult};
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct Metal {
-    albedo: Colour,
+    albedo: Box<dyn Texture>,
     fuzziness: f64,
 }
 
@@ -13,7 +19,10 @@ impl Metal {
         if fuzziness > 1. {
             fuzziness = 1.;
         }
-        Self { albedo, fuzziness }
+        Self {
+            albedo: Box::new(SolidColour::new(albedo)),
+            fuzziness,
+        }
     }
 }
 
@@ -36,6 +45,10 @@ impl Material for Metal {
             _ => Behaviour::Absorb, // This is likely needed for NaNs
         };
 
-        MaterialScatterResult::new(behaviour, self.albedo, scattered)
+        MaterialScatterResult::new(
+            behaviour,
+            self.albedo.get_value(hitrec.u, hitrec.v, &hitrec.point),
+            scattered,
+        )
     }
 }

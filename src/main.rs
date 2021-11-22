@@ -1,6 +1,8 @@
 use std::{error::Error, path::Path};
 
-use lumiere::{bvh::BVHNode, camera, image, material, object, scene::Scene, Colour, Point3};
+use lumiere::{
+    bvh::BVHNode, camera, image, material, object, scene::Scene, texture, Colour, Point3,
+};
 use rand::{rngs, Rng};
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -8,9 +10,9 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // Image parameters
     const ASPECT_RATIO: f64 = 16. / 9.;
-    const IMAGE_WIDTH: usize = 3840;
+    const IMAGE_WIDTH: usize = 900;
     const IMAGE_HEIGHT: usize = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as usize;
-    let samples_per_pixel: usize = 500;
+    let samples_per_pixel: usize = 20;
     let max_depth = 50;
 
     // Pixel array as height * rows * channels 8 bit values
@@ -18,7 +20,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut pixels = vec![0_u8; BUFFER_LENGTH];
 
     // Generate the objects
-    let (camera, world) = example_complex_scene(&mut rng);
+    let (camera, world) = example_earth_scene(&mut rng);
 
     // Generate BVH tree
     let mut bvh_root = object::HittableList::new();
@@ -44,6 +46,33 @@ fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
+pub fn example_earth_scene(_rng: &mut rngs::ThreadRng) -> (camera::Camera, object::HittableList) {
+    // Camera
+    let camera_look_dir = Point3::new(0., 0., -12.);
+    let camera = camera::CameraBuilder::new()
+        .origin(Point3::new(0., 0., 12.))
+        .look_dir(camera_look_dir)
+        .fov(30.)
+        .aperture(0.1)
+        .focus_dist(10.)
+        .build();
+
+    // World
+    let mut world = object::HittableList::new();
+
+    let material_4 = Box::new(material::Lambertian::new(Box::new(
+        texture::ImageTexture::new("earthmap.png"),
+    )));
+    world.add(Box::new(object::Sphere::new(
+        "obj4".to_string(),
+        Point3::new(0., 0., 0.),
+        2.,
+        material_4,
+    )));
+
+    (camera, world)
+}
+
 pub fn example_basic_scene(_rng: &mut rngs::ThreadRng) -> (camera::Camera, object::HittableList) {
     // Camera
     let camera_look_dir = Point3::new(-13., -2., -3.);
@@ -59,7 +88,9 @@ pub fn example_basic_scene(_rng: &mut rngs::ThreadRng) -> (camera::Camera, objec
     let mut world = object::HittableList::new();
 
     // Ground
-    let material_ground = Box::new(material::Lambertian::new(Colour::new(0.5, 0.5, 0.5)));
+    let material_ground = Box::new(material::Lambertian::from_colour(Colour::new(
+        0.5, 0.5, 0.5,
+    )));
     world.add(Box::new(object::Sphere::new(
         "ground".to_string(),
         Point3::new(0., -1000., 0.),
@@ -75,12 +106,61 @@ pub fn example_basic_scene(_rng: &mut rngs::ThreadRng) -> (camera::Camera, objec
         material_3,
     )));
 
-    let material_4 = Box::new(material::Lambertian::new(Colour::new(0.7, 0.1, 0.5)));
+    let material_4 = Box::new(material::Lambertian::from_colour(Colour::new(
+        0.7, 0.1, 0.5,
+    )));
     world.add(Box::new(object::Sphere::new(
         "obj4".to_string(),
         Point3::new(7., 1., 0.),
         0.4,
         material_4,
+    )));
+
+    (camera, world)
+}
+
+pub fn example_two_spheres_scene(
+    _rng: &mut rngs::ThreadRng,
+) -> (camera::Camera, object::HittableList) {
+    // Camera
+    let camera_look_dir = Point3::new(-13., -2., -3.);
+    let camera = camera::CameraBuilder::new()
+        .origin(Point3::new(13., 2., 3.))
+        .look_dir(camera_look_dir)
+        .fov(20.)
+        .aperture(0.)
+        .focus_dist(10.)
+        .build();
+
+    // World
+    let mut world = object::HittableList::new();
+
+    // Sphere 1
+    let checker_1 = Box::new(texture::CheckerTexture::from_colours(
+        0.8,
+        Colour::new(0.2, 0.3, 0.1),
+        Colour::new(0.9, 0.9, 0.9),
+    ));
+    let material_1 = Box::new(material::Lambertian::new(checker_1));
+    world.add(Box::new(object::Sphere::new(
+        "sphere_1".to_string(),
+        Point3::new(0., -10., 0.),
+        10.,
+        material_1,
+    )));
+
+    // Sphere 2
+    let checker_2 = Box::new(texture::CheckerTexture::from_colours(
+        0.8,
+        Colour::new(0.2, 0.3, 0.1),
+        Colour::new(0.9, 0.9, 0.9),
+    ));
+    let material_2 = Box::new(material::Lambertian::new(checker_2));
+    world.add(Box::new(object::Sphere::new(
+        "sphere_1".to_string(),
+        Point3::new(0., 10., 0.),
+        10.,
+        material_2,
     )));
 
     (camera, world)
@@ -101,7 +181,12 @@ pub fn example_complex_scene(rng: &mut rngs::ThreadRng) -> (camera::Camera, obje
     let mut world = object::HittableList::new();
 
     // Ground
-    let material_ground = Box::new(material::Lambertian::new(Colour::new(0.5, 0.5, 0.5)));
+    let checker = Box::new(texture::CheckerTexture::from_colours(
+        0.32,
+        Colour::new(0.2, 0.3, 0.1),
+        Colour::new(0.9, 0.9, 0.9),
+    ));
+    let material_ground = Box::new(material::Lambertian::new(checker));
     world.add(Box::new(object::Sphere::new(
         "ground".to_string(),
         Point3::new(0., -1000., 0.),
@@ -124,7 +209,7 @@ pub fn example_complex_scene(rng: &mut rngs::ThreadRng) -> (camera::Camera, obje
                     a if a < 0.8 => {
                         // diffuse
                         let albedo = Colour::random_in_range_inclusive(rng, 0.0..=1.0);
-                        let sphere_material = material::Lambertian::new(albedo);
+                        let sphere_material = material::Lambertian::from_colour(albedo);
                         let centre_1 = centre; // + Vec3::new(0., rng.gen_range(0.0..=0.5), 0.);
                         world.add(Box::new(object::MovingSphere::new(
                             "".to_string(),
@@ -169,7 +254,9 @@ pub fn example_complex_scene(rng: &mut rngs::ThreadRng) -> (camera::Camera, obje
         material_1,
     )));
 
-    let material_2 = Box::new(material::Lambertian::new(Colour::new(0.4, 0.2, 0.1)));
+    let material_2 = Box::new(material::Lambertian::from_colour(Colour::new(
+        0.4, 0.2, 0.1,
+    )));
     world.add(Box::new(object::Sphere::new(
         "obj2".to_string(),
         Point3::new(-4., 1., 0.),
