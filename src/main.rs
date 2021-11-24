@@ -20,7 +20,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut pixels = vec![0_u8; BUFFER_LENGTH];
 
     // Generate the objects
-    let (camera, world) = example_earth_scene(&mut rng);
+    let (camera, world) = example_two_perlin_spheres_scene(&mut rng);
 
     // Generate BVH tree
     let mut bvh_root = object::HittableList::new();
@@ -160,6 +160,45 @@ pub fn example_two_spheres_scene(
         "sphere_1".to_string(),
         Point3::new(0., 10., 0.),
         10.,
+        material_2,
+    )));
+
+    (camera, world)
+}
+
+pub fn example_two_perlin_spheres_scene(
+    _rng: &mut rngs::ThreadRng,
+) -> (camera::Camera, object::HittableList) {
+    // Camera
+    let camera_look_dir = Point3::new(-13., -2., -3.);
+    let camera = camera::CameraBuilder::new()
+        .origin(Point3::new(13., 2., 3.))
+        .look_dir(camera_look_dir)
+        .fov(20.)
+        .aperture(0.)
+        .focus_dist(10.)
+        .build();
+
+    // World
+    let mut world = object::HittableList::new();
+
+    // Sphere 1
+    let texture_1 = Box::new(texture::NoiseTexture::new());
+    let material_1 = Box::new(material::Lambertian::new(texture_1));
+    world.add(Box::new(object::Sphere::new(
+        "sphere_1".to_string(),
+        Point3::new(0., -1000., 0.),
+        1000.,
+        material_1,
+    )));
+
+    // Sphere 2
+    let texture_2 = Box::new(texture::NoiseTexture::new());
+    let material_2 = Box::new(material::Lambertian::new(texture_2));
+    world.add(Box::new(object::Sphere::new(
+        "sphere_1".to_string(),
+        Point3::new(0., 2., 0.),
+        2.,
         material_2,
     )));
 
