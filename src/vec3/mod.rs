@@ -198,12 +198,7 @@ mod tests {
 
         let res = v.refract(&n, 1.5).unit();
 
-        // Slows down in x and z, so y component gets bigger
-        assert!(v.x * res.x > 0.); // Sign of z should be preserved
-        assert!(v.x.abs() > res.x.abs());
-        assert!(v.y * res.y > 0.); // Sign of y should be preserves
-        assert!(v.y.abs() < res.y.abs());
-        assert!(v.z * res.z > 0.); // Sign of z should be preserved
-        assert!(v.z.abs() > res.z.abs());
+        // Should be unchanged
+        assert_eq!(v, res);
     }
 }

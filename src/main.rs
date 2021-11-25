@@ -1,7 +1,8 @@
 use std::{error::Error, path::Path};
 
 use lumiere::{
-    bvh::BVHNode, camera, image, material, object, scene::Scene, texture, Colour, Point3,
+    bvh::BVHNode, camera, image, material, object, scene::Scene, texture, vec3::Vec3, Colour,
+    Point3,
 };
 use rand::{rngs, Rng};
 
@@ -20,7 +21,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut pixels = vec![0_u8; BUFFER_LENGTH];
 
     // Generate the objects
-    let (camera, world) = example_two_perlin_spheres_scene(&mut rng);
+    let (camera, world) = example_quads_scene(&mut rng);
 
     // Generate BVH tree
     let mut bvh_root = object::HittableList::new();
@@ -309,6 +310,67 @@ pub fn example_complex_scene(rng: &mut rngs::ThreadRng) -> (camera::Camera, obje
         Point3::new(4., 1., 0.),
         1.,
         material_3,
+    )));
+
+    (camera, world)
+}
+
+pub fn example_quads_scene(_rng: &mut rngs::ThreadRng) -> (camera::Camera, object::HittableList) {
+    // Camera
+    let camera_look_dir = Point3::new(0., 0., -9.);
+    let camera = camera::CameraBuilder::new()
+        .origin(Point3::new(0., 0., 9.))
+        .look_dir(camera_look_dir)
+        .fov(80.)
+        .aperture(0.)
+        .focus_dist(10.)
+        .build();
+
+    // World
+    let mut world = object::HittableList::new();
+
+    let left_red = Box::new(material::Lambertian::from_colour(Colour::new(1., 0.2, 0.2)));
+    let back_green = Box::new(material::Lambertian::from_colour(Colour::new(0.2, 1., 0.2)));
+    let right_blue = Box::new(material::Lambertian::from_colour(Colour::new(0.2, 0.2, 1.)));
+    let upper_orange = Box::new(material::Lambertian::from_colour(Colour::new(1., 0.5, 0.)));
+    let lower_teal = Box::new(material::Lambertian::from_colour(Colour::new(
+        0.2, 0.8, 0.8,
+    )));
+
+    world.add(Box::new(object::Quad::new(
+        "".to_string(),
+        Point3::new(-3., -2., 5.),
+        Vec3::new(0., 0., -4.),
+        Vec3::new(0., 4., 0.),
+        left_red,
+    )));
+    world.add(Box::new(object::Quad::new(
+        "".to_string(),
+        Point3::new(-2., -2., 0.),
+        Vec3::new(4., 0., 0.),
+        Vec3::new(0., 4., 0.),
+        back_green,
+    )));
+    world.add(Box::new(object::Quad::new(
+        "".to_string(),
+        Point3::new(3., -2., 1.),
+        Vec3::new(0., 0., 4.),
+        Vec3::new(0., 4., 0.),
+        right_blue,
+    )));
+    world.add(Box::new(object::Quad::new(
+        "".to_string(),
+        Point3::new(-2., 3., 1.),
+        Vec3::new(4., 0., 0.),
+        Vec3::new(0., 0., 4.),
+        upper_orange,
+    )));
+    world.add(Box::new(object::Quad::new(
+        "".to_string(),
+        Point3::new(-2., -3., 5.),
+        Vec3::new(4., 0., 0.),
+        Vec3::new(0., 0., -4.),
+        lower_teal,
     )));
 
     (camera, world)

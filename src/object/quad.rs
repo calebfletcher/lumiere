@@ -1,0 +1,231 @@
+use crate::{aabb::AABB, material, object, vec3::Vec3, Point3};
+
+use super::Hittable;
+
+#[derive(Debug)]
+pub struct Quad {
+    name: String,
+    q: Point3,
+    u: Vec3,
+    v: Vec3,
+    mat: Box<dyn material::Material>,
+    aabb: AABB,
+    normal: Vec3,
+    d: f64,
+    w: Vec3,
+}
+
+impl Quad {
+    pub fn new(
+        name: String,
+        q: Point3,
+        u: Vec3,
+        v: Vec3,
+        mat: Box<dyn material::Material>,
+    ) -> Self {
+        let aabb = AABB::from_points(q, q + u + v).pad();
+        let n = u.cross(v);
+        let normal = n.unit();
+        let d = normal.dot(q);
+        let w = n / n.length_squared();
+        Self {
+            name,
+            q,
+            u,
+            v,
+            mat,
+            aabb,
+            normal,
+            d,
+            w,
+        }
+    }
+}
+
+impl Hittable for Quad {
+    fn hit(
+        &self,
+        r: &crate::ray::Ray,
+        ray_t: &crate::interval::Interval,
+    ) -> Option<super::HitRecord> {
+        let denom = self.normal.dot(r.direction.unit());
+
+        // If denominator is effectively zero, then the ray is parallel to the
+        // plane the quad is in, and so won't hit it
+        if denom.abs() < 1e-8 {
+            return None;
+        }
+
+        // If the hit point would be outside the valid range, there is not hit
+        let t = (self.d - self.normal.dot(r.origin)) / denom;
+        if !ray_t.contains(t) {
+            return None;
+        }
+
+        let intersection = r.at(t);
+
+        let planar_hitpoint_vec = intersection - self.q;
+        let alpha = self.w.dot(planar_hitpoint_vec.cross(self.v));
+        let beta = self.w.dot(self.u.cross(planar_hitpoint_vec));
+
+        // If ray intersection point is not inside the quad, there's no hit
+        if alpha < 0. || alpha > 1. || beta < 0. || beta > 1. {
+            return None;
+        }
+
+        let mut hitrec =
+            object::HitRecord::new(intersection, self.normal, t, alpha, beta, &self.mat);
+        hitrec.set_face_normal(r, self.normal);
+        Some(hitrec)
+    }
+
+    fn name(&self) -> String {
+        self.name.clone()
+    }
+
+    fn bounding_box(&self) -> &AABB {
+        &self.aabb
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{interval, material, object::Hittable, ray::Ray, vec3::Vec3, Colour, Point3};
+
+    use super::Quad;
+
+    #[test]
+    fn hit_quad_centre() {
+        let mat = Box::new(material::Lambertian::from_colour(Colour::new(1., 0.2, 0.2)));
+        let q = Vec3::new(-0.5, -0.5, 1.);
+        let u = Vec3::new(1., 0., 0.);
+        let v = Vec3::new(0., 1., 0.);
+        let quad = Quad::new("".to_string(), q, u, v, mat);
+
+        let ray_origin = Point3::new(0., 0., 0.);
+        let ray_direction = Vec3::new(0., 0., 1.);
+        let r = Ray::new(ray_origin, ray_direction, 0.);
+
+        let hit_result = quad.hit(&r, &interval::UNIVERSE);
+
+        assert!(hit_result.is_some());
+        let hit_result = hit_result.unwrap();
+
+        let expected = Point3::new(0., 0., 1.);
+        assert_eq!(hit_result.point, expected);
+    }
+
+    #[test]
+    fn hit_quad_off_centre() {
+        let mat = Box::new(material::Lambertian::from_colour(Colour::new(1., 0.2, 0.2)));
+        let q = Vec3::new(-0.5, -0.5, 1.);
+        let u = Vec3::new(1., 0., 0.);
+        let v = Vec3::new(0., 1., 0.);
+        let quad = Quad::new("".to_string(), q, u, v, mat);
+
+        let ray_origin = Point3::new(0.4, 0.4, 0.);
+        let ray_direction = Vec3::new(0., 0., 1.);
+        let r = Ray::new(ray_origin, ray_direction, 0.);
+
+        let hit_result = quad.hit(&r, &interval::UNIVERSE);
+
+        assert!(hit_result.is_some());
+        let hit_result = hit_result.unwrap();
+
+        let expected = Point3::new(0.4, 0.4, 1.);
+        assert_eq!(hit_result.point, expected);
+    }
+
+    #[test]
+    fn hit_quad_multiple() {
+        let mat = Box::new(material::Lambertian::from_colour(Colour::new(1., 0.2, 0.2)));
+        let q = Vec3::new(-0.5, -0.5, 1.);
+        let u = Vec3::new(1., 0., 0.);
+        let v = Vec3::new(0., 1., 0.);
+        let quad = Quad::new("".to_string(), q, u, v, mat);
+
+        let ray_origin = Point3::new(0., 0., 0.);
+
+        // Hit rays
+
+        // Ray 1
+        let ray_direction = Vec3::new(0.2, 0., 1.);
+        let r = Ray::new(ray_origin, ray_direction, 0.);
+        assert!(quad.hit(&r, &interval::UNIVERSE).is_some());
+        // Ray 2
+        let ray_direction = Vec3::new(-0.2, 0., 1.);
+        let r = Ray::new(ray_origin, ray_direction, 0.);
+        assert!(quad.hit(&r, &interval::UNIVERSE).is_some());
+        // Ray 3
+        let ray_direction = Vec3::new(0., 0.2, 1.);
+        let r = Ray::new(ray_origin, ray_direction, 0.);
+        assert!(quad.hit(&r, &interval::UNIVERSE).is_some());
+        // Ray 4
+        let ray_direction = Vec3::new(0., -0.2, 1.);
+        let r = Ray::new(ray_origin, ray_direction, 0.);
+        assert!(quad.hit(&r, &interval::UNIVERSE).is_some());
+        // Ray 5
+        let ray_direction = Vec3::new(0.2, 0.2, 1.);
+        let r = Ray::new(ray_origin, ray_direction, 0.);
+        assert!(quad.hit(&r, &interval::UNIVERSE).is_some());
+        // Ray 6
+        let ray_direction = Vec3::new(0.2, -0.2, 1.);
+        let r = Ray::new(ray_origin, ray_direction, 0.);
+        assert!(quad.hit(&r, &interval::UNIVERSE).is_some());
+        // Ray 7
+        let ray_direction = Vec3::new(-0.2, 0.2, 1.);
+        let r = Ray::new(ray_origin, ray_direction, 0.);
+        assert!(quad.hit(&r, &interval::UNIVERSE).is_some());
+        // Ray 8
+        let ray_direction = Vec3::new(-0.2, -0.2, 1.);
+        let r = Ray::new(ray_origin, ray_direction, 0.);
+        assert!(quad.hit(&r, &interval::UNIVERSE).is_some());
+
+        // Miss rays
+
+        // Ray 1
+        let ray_direction = Vec3::new(1., 1., 1.);
+        let r = Ray::new(ray_origin, ray_direction, 0.);
+        assert!(quad.hit(&r, &interval::UNIVERSE).is_none());
+        // Ray 2
+        let ray_direction = Vec3::new(1., -1., 1.);
+        let r = Ray::new(ray_origin, ray_direction, 0.);
+        assert!(quad.hit(&r, &interval::UNIVERSE).is_none());
+        // Ray 3
+        let ray_direction = Vec3::new(-1., 1., 1.);
+        let r = Ray::new(ray_origin, ray_direction, 0.);
+        assert!(quad.hit(&r, &interval::UNIVERSE).is_none());
+        // Ray 4
+        let ray_direction = Vec3::new(-1., 1., 1.);
+        let r = Ray::new(ray_origin, ray_direction, 0.);
+        assert!(quad.hit(&r, &interval::UNIVERSE).is_none());
+    }
+
+    #[test]
+    fn hit_top() {
+        let back_green = Box::new(material::Lambertian::from_colour(Colour::new(0.2, 1., 0.2)));
+        let green = Box::new(Quad::new(
+            "".to_string(),
+            Point3::new(-2., -2., 0.),
+            Vec3::new(4., 0., 0.),
+            Vec3::new(0., 4., 0.),
+            back_green,
+        ));
+
+        let r = Ray {
+            origin: Vec3 {
+                x: 0.0,
+                y: 0.0,
+                z: 9.0,
+            },
+            direction: Vec3 {
+                x: 0.0,
+                y: 0.5573489911065506,
+                z: -0.8302783280999875,
+            },
+            time: 0.22690750755679256,
+        };
+
+        assert!(green.hit(&r, &interval::UNIVERSE).is_none());
+    }
+}

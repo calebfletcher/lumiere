@@ -59,6 +59,30 @@ impl AABB {
         }
         true
     }
+
+    pub fn pad(&self) -> Self {
+        let delta: f64 = 0.0001;
+        let new_x = if self.x.size() >= delta {
+            self.x
+        } else {
+            self.x.expand(delta)
+        };
+        let new_y = if self.y.size() >= delta {
+            self.y
+        } else {
+            self.y.expand(delta)
+        };
+        let new_z = if self.z.size() >= delta {
+            self.z
+        } else {
+            self.z.expand(delta)
+        };
+        Self {
+            x: new_x,
+            y: new_y,
+            z: new_z,
+        }
+    }
 }
 
 #[cfg(test)]
@@ -95,19 +119,5 @@ mod tests {
         let r = Ray::new(ray_origin, ray_direction, 0.);
 
         assert!(!bb.hit(&r, &interval::UNIVERSE));
-    }
-
-    #[test]
-    fn bb_join() {
-        let p0_0 = Point3::new(-1., -1., -1.);
-        let p0_1 = Point3::new(1., 1., 1.);
-        let p1_0 = Point3::new(-0.3, -0.3, 0.7);
-        let p1_1 = Point3::new(0.3, 0.3, 1.3);
-
-        let bb_0 = AABB::from_points(p0_0, p0_1);
-        let bb_1 = AABB::from_points(p1_0, p1_1);
-
-        let _bb = AABB::from_boxes(&bb_0, &bb_1);
-        todo!();
     }
 }
