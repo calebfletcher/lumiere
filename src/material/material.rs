@@ -1,6 +1,6 @@
 use std::fmt;
 
-use crate::{object::HitRecord, ray::Ray, Colour};
+use crate::{object::HitRecord, ray::Ray, Colour, Point3};
 
 #[derive(Debug)]
 pub enum Behaviour {
@@ -32,4 +32,8 @@ pub trait Material: fmt::Debug {
         hitrec: &HitRecord,
         rng: &mut rand::rngs::ThreadRng,
     ) -> MaterialScatterResult;
+
+    fn emitted(&self, _u: f64, _v: f64, _p: &Point3) -> Colour {
+        Colour::new(0., 0., 0.)
+    }
 }

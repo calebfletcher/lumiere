@@ -18,6 +18,7 @@ pub struct Scene {
     samples_per_pixel: usize,
     image_width: usize,
     image_height: usize,
+    background: Colour,
 }
 
 impl Scene {
@@ -28,6 +29,7 @@ impl Scene {
         samples_per_pixel: usize,
         image_width: usize,
         image_height: usize,
+        background: Colour,
     ) -> Self {
         Self {
             world,
@@ -36,6 +38,7 @@ impl Scene {
             samples_per_pixel,
             image_width,
             image_height,
+            background,
         }
     }
 
@@ -77,21 +80,21 @@ impl Scene {
         {
             Some(hitrec) => {
                 // Ray intersects object
-
+                let emitted = hitrec.mat.emitted(hitrec.u, hitrec.v, &hitrec.point);
                 let scatter_result = hitrec.mat.scatter(r, &hitrec, rng);
+
                 match scatter_result.behaviour {
                     Behaviour::Scatter => {
-                        scatter_result.attenuation
-                            * self.ray_colour(&scatter_result.scattered, depth - 1, rng)
+                        emitted
+                            + scatter_result.attenuation
+                                * self.ray_colour(&scatter_result.scattered, depth - 1, rng)
                     }
-                    Behaviour::Absorb => Colour::new(0., 0., 0.),
+                    Behaviour::Absorb => emitted,
                 }
             }
             None => {
                 // Ray doesn't intersect any objects
-                let unit = r.direction.unit();
-                let t = 0.5 * (unit.y + 1.0);
-                Colour::new(1.0, 1.0, 1.0) * (1.0 - t) + Colour::new(0.5, 0.7, 1.0) * t
+                self.background
             }
         }
     }

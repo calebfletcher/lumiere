@@ -11,9 +11,9 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // Image parameters
     const ASPECT_RATIO: f64 = 16. / 9.;
-    const IMAGE_WIDTH: usize = 900;
+    const IMAGE_WIDTH: usize = 600;
     const IMAGE_HEIGHT: usize = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as usize;
-    let samples_per_pixel: usize = 20;
+    let samples_per_pixel: usize = 3000;
     let max_depth = 50;
 
     // Pixel array as height * rows * channels 8 bit values
@@ -21,7 +21,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut pixels = vec![0_u8; BUFFER_LENGTH];
 
     // Generate the objects
-    let (camera, world) = example_quads_scene(&mut rng);
+    let (camera, world) = example_simple_light_scene(&mut rng);
 
     // Generate BVH tree
     let mut bvh_root = object::HittableList::new();
@@ -35,6 +35,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         samples_per_pixel,
         IMAGE_WIDTH,
         IMAGE_HEIGHT,
+        Colour::new(0., 0., 0.),
     );
 
     // Render the scene to a frame buffer
@@ -371,6 +372,60 @@ pub fn example_quads_scene(_rng: &mut rngs::ThreadRng) -> (camera::Camera, objec
         Vec3::new(4., 0., 0.),
         Vec3::new(0., 0., -4.),
         lower_teal,
+    )));
+
+    (camera, world)
+}
+
+pub fn example_simple_light_scene(
+    _rng: &mut rngs::ThreadRng,
+) -> (camera::Camera, object::HittableList) {
+    // Camera
+    let camera_look_dir = Point3::new(-26., -1., -6.);
+    let camera = camera::CameraBuilder::new()
+        .origin(Point3::new(26., 3., 6.))
+        .look_dir(camera_look_dir)
+        .fov(20.)
+        .aperture(0.)
+        .focus_dist(10.)
+        .build();
+
+    // World
+    let mut world = object::HittableList::new();
+
+    let noise = Box::new(texture::NoiseTexture::new());
+    let noise_texture = Box::new(material::Lambertian::new(noise));
+    world.add(Box::new(object::Sphere::new(
+        "".to_string(),
+        Point3::new(0., -1000., 0.),
+        1000.,
+        noise_texture,
+    )));
+
+    let noise = Box::new(texture::NoiseTexture::new());
+    let noise_texture = Box::new(material::Lambertian::new(noise));
+    world.add(Box::new(object::Sphere::new(
+        "".to_string(),
+        Point3::new(0., 2., 0.),
+        2.,
+        noise_texture,
+    )));
+
+    let diff_light = Box::new(material::DiffuseLight::from_colour(Colour::new(4., 4., 4.)));
+    world.add(Box::new(object::Quad::new(
+        "".to_string(),
+        Point3::new(3., 1., -2.),
+        Point3::new(2., 0., 0.),
+        Point3::new(0., 2., 0.),
+        diff_light,
+    )));
+
+    let diff_light = Box::new(material::DiffuseLight::from_colour(Colour::new(4., 4., 4.)));
+    world.add(Box::new(object::Sphere::new(
+        "".to_string(),
+        Point3::new(0., 7., 0.),
+        2.,
+        diff_light,
     )));
 
     (camera, world)
