@@ -21,7 +21,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut pixels = vec![0_u8; BUFFER_LENGTH];
 
     // Generate the objects
-    let (camera, world) = example_simple_light_scene(&mut rng);
+    let (camera, world) = example_cornell_box(&mut rng);
 
     // Generate BVH tree
     let mut bvh_root = object::HittableList::new();
@@ -426,6 +426,84 @@ pub fn example_simple_light_scene(
         Point3::new(0., 7., 0.),
         2.,
         diff_light,
+    )));
+
+    (camera, world)
+}
+
+pub fn example_cornell_box(_rng: &mut rngs::SmallRng) -> (camera::Camera, object::HittableList) {
+    // Camera
+    let camera_look_dir = Point3::new(0., 0., 1.);
+    let camera = camera::CameraBuilder::new()
+        .origin(Point3::new(278., 278., -800.))
+        .look_dir(camera_look_dir)
+        .fov(40.)
+        .aperture(0.)
+        .build();
+
+    // World
+    let mut world = object::HittableList::new();
+
+    let red = Box::new(material::Lambertian::from_colour(Colour::new(
+        0.65, 0.05, 0.05,
+    )));
+    let white1 = Box::new(material::Lambertian::from_colour(Colour::new(
+        0.73, 0.73, 0.73,
+    )));
+    let white2 = Box::new(material::Lambertian::from_colour(Colour::new(
+        0.73, 0.73, 0.73,
+    )));
+    let white3 = Box::new(material::Lambertian::from_colour(Colour::new(
+        0.73, 0.73, 0.73,
+    )));
+    let green = Box::new(material::Lambertian::from_colour(Colour::new(
+        0.12, 0.45, 0.12,
+    )));
+    let light = Box::new(material::DiffuseLight::from_colour(Colour::new(
+        15., 15., 15.,
+    )));
+
+    world.add(Box::new(object::Quad::new(
+        "".to_string(),
+        Vec3::new(555., 0., 0.),
+        Vec3::new(0., 555., 0.),
+        Vec3::new(0., 0., 555.),
+        green,
+    )));
+    world.add(Box::new(object::Quad::new(
+        "".to_string(),
+        Vec3::new(0., 0., 0.),
+        Vec3::new(0., 555., 0.),
+        Vec3::new(0., 0., 555.),
+        red,
+    )));
+    world.add(Box::new(object::Quad::new(
+        "".to_string(),
+        Vec3::new(343., 554., 332.),
+        Vec3::new(-130., 0., 0.),
+        Vec3::new(0., 0., -105.),
+        light,
+    )));
+    world.add(Box::new(object::Quad::new(
+        "".to_string(),
+        Vec3::new(0., 0., 0.),
+        Vec3::new(555., 0., 0.),
+        Vec3::new(0., 0., 555.),
+        white1,
+    )));
+    world.add(Box::new(object::Quad::new(
+        "".to_string(),
+        Vec3::new(555., 555., 555.),
+        Vec3::new(-555., 0., 0.),
+        Vec3::new(0., 0., -555.),
+        white2,
+    )));
+    world.add(Box::new(object::Quad::new(
+        "".to_string(),
+        Vec3::new(0., 0., 555.),
+        Vec3::new(555., 0., 0.),
+        Vec3::new(0., 555., 0.),
+        white3,
     )));
 
     (camera, world)
