@@ -1,6 +1,8 @@
+use std::rc::Rc;
+
 use crate::{aabb::AABB, material, object, vec3::Vec3, Point3};
 
-use super::Hittable;
+use super::{Hittable, HittableList};
 
 #[derive(Debug)]
 pub struct Quad {
@@ -8,7 +10,7 @@ pub struct Quad {
     q: Point3,
     u: Vec3,
     v: Vec3,
-    mat: Box<dyn material::Material>,
+    mat: Rc<dyn material::Material>,
     aabb: AABB,
     normal: Vec3,
     d: f64,
@@ -16,13 +18,7 @@ pub struct Quad {
 }
 
 impl Quad {
-    pub fn new(
-        name: String,
-        q: Point3,
-        u: Vec3,
-        v: Vec3,
-        mat: Box<dyn material::Material>,
-    ) -> Self {
+    pub fn new(name: String, q: Point3, u: Vec3, v: Vec3, mat: Rc<dyn material::Material>) -> Self {
         let aabb = AABB::from_points(q, q + u + v).pad();
         let n = u.cross(v);
         let normal = n.unit();
@@ -90,13 +86,15 @@ impl Hittable for Quad {
 
 #[cfg(test)]
 mod tests {
+    use std::rc::Rc;
+
     use crate::{interval, material, object::Hittable, ray::Ray, vec3::Vec3, Colour, Point3};
 
     use super::Quad;
 
     #[test]
     fn hit_quad_centre() {
-        let mat = Box::new(material::Lambertian::from_colour(Colour::new(1., 0.2, 0.2)));
+        let mat = Rc::new(material::Lambertian::from_colour(Colour::new(1., 0.2, 0.2)));
         let q = Vec3::new(-0.5, -0.5, 1.);
         let u = Vec3::new(1., 0., 0.);
         let v = Vec3::new(0., 1., 0.);
@@ -117,7 +115,7 @@ mod tests {
 
     #[test]
     fn hit_quad_off_centre() {
-        let mat = Box::new(material::Lambertian::from_colour(Colour::new(1., 0.2, 0.2)));
+        let mat = Rc::new(material::Lambertian::from_colour(Colour::new(1., 0.2, 0.2)));
         let q = Vec3::new(-0.5, -0.5, 1.);
         let u = Vec3::new(1., 0., 0.);
         let v = Vec3::new(0., 1., 0.);
@@ -138,7 +136,7 @@ mod tests {
 
     #[test]
     fn hit_quad_multiple() {
-        let mat = Box::new(material::Lambertian::from_colour(Colour::new(1., 0.2, 0.2)));
+        let mat = Rc::new(material::Lambertian::from_colour(Colour::new(1., 0.2, 0.2)));
         let q = Vec3::new(-0.5, -0.5, 1.);
         let u = Vec3::new(1., 0., 0.);
         let v = Vec3::new(0., 1., 0.);
@@ -203,7 +201,7 @@ mod tests {
 
     #[test]
     fn hit_top() {
-        let back_green = Box::new(material::Lambertian::from_colour(Colour::new(0.2, 1., 0.2)));
+        let back_green = Rc::new(material::Lambertian::from_colour(Colour::new(0.2, 1., 0.2)));
         let green = Box::new(Quad::new(
             "".to_string(),
             Point3::new(-2., -2., 0.),

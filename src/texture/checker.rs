@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use crate::{Colour, Point3};
 
 use super::{SolidColour, Texture};
@@ -5,12 +7,12 @@ use super::{SolidColour, Texture};
 #[derive(Debug)]
 pub struct CheckerTexture {
     inv_scale: f64,
-    even: Box<dyn Texture>,
-    odd: Box<dyn Texture>,
+    even: Rc<dyn Texture>,
+    odd: Rc<dyn Texture>,
 }
 
 impl CheckerTexture {
-    pub fn new(scale: f64, even: Box<dyn Texture>, odd: Box<dyn Texture>) -> Self {
+    pub fn new(scale: f64, even: Rc<dyn Texture>, odd: Rc<dyn Texture>) -> Self {
         Self {
             inv_scale: 1. / scale,
             even,
@@ -21,8 +23,8 @@ impl CheckerTexture {
     pub fn from_colours(scale: f64, even: Colour, odd: Colour) -> Self {
         Self {
             inv_scale: 1. / scale,
-            even: Box::new(SolidColour::new(even)),
-            odd: Box::new(SolidColour::new(odd)),
+            even: Rc::new(SolidColour::new(even)),
+            odd: Rc::new(SolidColour::new(odd)),
         }
     }
 }

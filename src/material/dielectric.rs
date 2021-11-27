@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use rand::Rng;
 
 use crate::{object::HitRecord, ray::Ray, texture::SolidColour, texture::Texture, Colour};
@@ -6,13 +8,13 @@ use super::{Behaviour, Material, MaterialScatterResult};
 
 #[derive(Debug)]
 pub struct Dielectric {
-    attenuation: Box<dyn Texture>,
+    attenuation: Rc<dyn Texture>,
     ir: f64, // Index of refraction
 }
 
 impl Dielectric {
     pub fn new(ir: f64) -> Self {
-        let attenuation = Box::new(SolidColour::new(Colour::new(1., 1., 1.)));
+        let attenuation = Rc::new(SolidColour::new(Colour::new(1., 1., 1.)));
         Self { ir, attenuation }
     }
 

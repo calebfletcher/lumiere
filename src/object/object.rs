@@ -1,4 +1,4 @@
-use std::fmt;
+use std::{fmt, rc::Rc};
 
 use crate::{aabb::AABB, interval, material, ray::Ray, vec3::Vec3, Point3};
 
@@ -10,7 +10,7 @@ pub struct HitRecord<'a> {
     pub u: f64,
     pub v: f64,
     pub front_face: bool,
-    pub mat: &'a Box<dyn material::Material>,
+    pub mat: &'a Rc<dyn material::Material>,
 }
 
 impl<'a> HitRecord<'a> {
@@ -20,7 +20,7 @@ impl<'a> HitRecord<'a> {
         t: f64,
         u: f64,
         v: f64,
-        mat: &'a Box<dyn material::Material>,
+        mat: &'a Rc<dyn material::Material>,
     ) -> Self {
         HitRecord {
             point,

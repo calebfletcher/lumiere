@@ -1,4 +1,4 @@
-use std::f64::consts;
+use std::{f64::consts, rc::Rc};
 
 use crate::{aabb::AABB, interval, material, ray::Ray, vec3::Vec3, Point3};
 
@@ -12,7 +12,7 @@ pub struct MovingSphere {
     centre_1: Point3,
     centre_vec: Vec3,
     radius: f64,
-    mat: Box<dyn material::Material>,
+    mat: Rc<dyn material::Material>,
     aabb: AABB,
 }
 
@@ -22,7 +22,7 @@ impl MovingSphere {
         centre_0: Point3,
         centre_1: Point3,
         radius: f64,
-        mat: Box<dyn material::Material>,
+        mat: Rc<dyn material::Material>,
     ) -> Self {
         let rvec = Vec3::new(radius, radius, radius);
         let box0 = AABB::from_points(centre_0 - rvec, centre_0 + rvec);

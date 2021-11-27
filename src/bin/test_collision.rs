@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use lumiere::{
     interval, material,
     object::{self, Hittable},
@@ -9,7 +11,7 @@ use rand::SeedableRng;
 
 fn main() {
     let mut rng = rand::rngs::SmallRng::from_entropy();
-    let material_centre = Box::new(material::Dielectric::new(1.5));
+    let material_centre = Rc::new(material::Dielectric::new(1.5));
 
     let sphere = object::Sphere::new(
         String::from("glass ball"),

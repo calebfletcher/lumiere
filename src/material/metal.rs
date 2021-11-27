@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use crate::{
     object::HitRecord,
     ray::Ray,
@@ -10,7 +12,7 @@ use super::{Behaviour, Material, MaterialScatterResult};
 
 #[derive(Debug)]
 pub struct Metal {
-    albedo: Box<dyn Texture>,
+    albedo: Rc<dyn Texture>,
     fuzziness: f64,
 }
 
@@ -20,7 +22,7 @@ impl Metal {
             fuzziness = 1.;
         }
         Self {
-            albedo: Box::new(SolidColour::new(albedo)),
+            albedo: Rc::new(SolidColour::new(albedo)),
             fuzziness,
         }
     }

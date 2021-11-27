@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use crate::{
     object::HitRecord,
     ray::Ray,
@@ -10,17 +12,17 @@ use super::{Behaviour, Material, MaterialScatterResult};
 
 #[derive(Debug)]
 pub struct Lambertian {
-    albedo: Box<dyn Texture>,
+    albedo: Rc<dyn Texture>,
 }
 
 impl Lambertian {
-    pub fn new(albedo: Box<dyn Texture>) -> Self {
+    pub fn new(albedo: Rc<dyn Texture>) -> Self {
         Self { albedo }
     }
 
     pub fn from_colour(albedo: Colour) -> Self {
         Self {
-            albedo: Box::new(SolidColour::new(albedo)),
+            albedo: Rc::new(SolidColour::new(albedo)),
         }
     }
 }

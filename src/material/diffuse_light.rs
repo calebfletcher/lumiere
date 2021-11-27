@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use crate::{
     object::HitRecord,
     ray::Ray,
@@ -10,17 +12,17 @@ use super::{Behaviour, Material, MaterialScatterResult};
 
 #[derive(Debug)]
 pub struct DiffuseLight {
-    emit: Box<dyn Texture>,
+    emit: Rc<dyn Texture>,
 }
 
 impl DiffuseLight {
-    pub fn new(emit: Box<dyn Texture>) -> Self {
+    pub fn new(emit: Rc<dyn Texture>) -> Self {
         Self { emit }
     }
 
     pub fn from_colour(emit: Colour) -> Self {
         Self {
-            emit: Box::new(SolidColour::new(emit)),
+            emit: Rc::new(SolidColour::new(emit)),
         }
     }
 }
