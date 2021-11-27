@@ -110,7 +110,7 @@ impl Camera {
     /// Gets the ray of the camera with a given normalised pixel coordinates s,t.
     /// s,t is 0,0 at the top left corner, 1,1 in the bottom right corner, 1,0
     /// is the top right corner, and 0,1 is the bottom left corner.
-    pub fn get_ray(&self, s: f64, t: f64, rng: &mut rngs::ThreadRng) -> Ray {
+    pub fn get_ray(&self, s: f64, t: f64, rng: &mut rngs::SmallRng) -> Ray {
         let rd = Vec3::random_in_unit_disk(rng) * self.lens_radius;
         let offset = self.u * rd.x + self.v * rd.y;
         Ray::new(

@@ -4,10 +4,10 @@ use lumiere::{
     bvh::BVHNode, camera, image, material, object, scene::Scene, texture, vec3::Vec3, Colour,
     Point3,
 };
-use rand::{rngs, Rng};
+use rand::{rngs, Rng, SeedableRng};
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let mut rng = rand::thread_rng();
+    let mut rng = rngs::SmallRng::from_entropy();
 
     // Image parameters
     const ASPECT_RATIO: f64 = 16. / 9.;
@@ -48,7 +48,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-pub fn example_earth_scene(_rng: &mut rngs::ThreadRng) -> (camera::Camera, object::HittableList) {
+pub fn example_earth_scene(_rng: &mut rngs::SmallRng) -> (camera::Camera, object::HittableList) {
     // Camera
     let camera_look_dir = Point3::new(0., 0., -12.);
     let camera = camera::CameraBuilder::new()
@@ -75,7 +75,7 @@ pub fn example_earth_scene(_rng: &mut rngs::ThreadRng) -> (camera::Camera, objec
     (camera, world)
 }
 
-pub fn example_basic_scene(_rng: &mut rngs::ThreadRng) -> (camera::Camera, object::HittableList) {
+pub fn example_basic_scene(_rng: &mut rngs::SmallRng) -> (camera::Camera, object::HittableList) {
     // Camera
     let camera_look_dir = Point3::new(-13., -2., -3.);
     let camera = camera::CameraBuilder::new()
@@ -122,7 +122,7 @@ pub fn example_basic_scene(_rng: &mut rngs::ThreadRng) -> (camera::Camera, objec
 }
 
 pub fn example_two_spheres_scene(
-    _rng: &mut rngs::ThreadRng,
+    _rng: &mut rngs::SmallRng,
 ) -> (camera::Camera, object::HittableList) {
     // Camera
     let camera_look_dir = Point3::new(-13., -2., -3.);
@@ -169,7 +169,7 @@ pub fn example_two_spheres_scene(
 }
 
 pub fn example_two_perlin_spheres_scene(
-    _rng: &mut rngs::ThreadRng,
+    _rng: &mut rngs::SmallRng,
 ) -> (camera::Camera, object::HittableList) {
     // Camera
     let camera_look_dir = Point3::new(-13., -2., -3.);
@@ -207,7 +207,7 @@ pub fn example_two_perlin_spheres_scene(
     (camera, world)
 }
 
-pub fn example_complex_scene(rng: &mut rngs::ThreadRng) -> (camera::Camera, object::HittableList) {
+pub fn example_complex_scene(rng: &mut rngs::SmallRng) -> (camera::Camera, object::HittableList) {
     // Camera
     let camera_look_dir = Point3::new(-13., -2., -3.);
     let camera = camera::CameraBuilder::new()
@@ -316,7 +316,7 @@ pub fn example_complex_scene(rng: &mut rngs::ThreadRng) -> (camera::Camera, obje
     (camera, world)
 }
 
-pub fn example_quads_scene(_rng: &mut rngs::ThreadRng) -> (camera::Camera, object::HittableList) {
+pub fn example_quads_scene(_rng: &mut rngs::SmallRng) -> (camera::Camera, object::HittableList) {
     // Camera
     let camera_look_dir = Point3::new(0., 0., -9.);
     let camera = camera::CameraBuilder::new()
@@ -378,7 +378,7 @@ pub fn example_quads_scene(_rng: &mut rngs::ThreadRng) -> (camera::Camera, objec
 }
 
 pub fn example_simple_light_scene(
-    _rng: &mut rngs::ThreadRng,
+    _rng: &mut rngs::SmallRng,
 ) -> (camera::Camera, object::HittableList) {
     // Camera
     let camera_look_dir = Point3::new(-26., -1., -6.);

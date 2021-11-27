@@ -5,9 +5,10 @@ use lumiere::{
     vec3::Vec3,
     Point3,
 };
+use rand::SeedableRng;
 
 fn main() {
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rngs::SmallRng::from_entropy();
     let material_centre = Box::new(material::Dielectric::new(1.5));
 
     let sphere = object::Sphere::new(

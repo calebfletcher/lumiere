@@ -16,11 +16,11 @@ pub struct BVHNode {
 }
 
 impl BVHNode {
-    pub fn new(list: HittableList, rng: &mut rngs::ThreadRng) -> Self {
+    pub fn new(list: HittableList, rng: &mut rngs::SmallRng) -> Self {
         Self::from_objects(list.objects, rng)
     }
 
-    fn from_objects(mut objects: Vec<Box<dyn Hittable>>, rng: &mut rngs::ThreadRng) -> Self {
+    fn from_objects(mut objects: Vec<Box<dyn Hittable>>, rng: &mut rngs::SmallRng) -> Self {
         let axis: usize = rng.gen_range(0..=2);
 
         let comparator = match axis {

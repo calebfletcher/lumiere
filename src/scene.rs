@@ -42,7 +42,7 @@ impl Scene {
         }
     }
 
-    pub fn render(&self, pixel_buffer: &mut Vec<u8>, rng: &mut rngs::ThreadRng) -> io::Result<()> {
+    pub fn render(&self, pixel_buffer: &mut Vec<u8>, rng: &mut rngs::SmallRng) -> io::Result<()> {
         let pb = ProgressBar::new(self.image_height as u64);
         pb.set_style(ProgressStyle::default_bar()
             .template("{spinner:.green} [{elapsed_precise}] [{wide_bar:.cyan/blue}] {percent}% ({eta_precise})"));
@@ -70,7 +70,7 @@ impl Scene {
         Ok(())
     }
 
-    fn ray_colour(&self, r: &Ray, depth: usize, rng: &mut rngs::ThreadRng) -> Colour {
+    fn ray_colour(&self, r: &Ray, depth: usize, rng: &mut rngs::SmallRng) -> Colour {
         if depth == 0 {
             return Colour::new(0., 0., 0.);
         }

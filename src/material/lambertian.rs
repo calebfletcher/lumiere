@@ -30,7 +30,7 @@ impl Material for Lambertian {
         &self,
         r: &Ray,
         hitrec: &HitRecord,
-        rng: &mut rand::rngs::ThreadRng,
+        rng: &mut rand::rngs::SmallRng,
     ) -> MaterialScatterResult {
         let mut scatter_direction = hitrec.normal + Vec3::random_in_unit_sphere(rng).unit();
 

@@ -30,7 +30,7 @@ impl Material for DiffuseLight {
         &self,
         _r: &Ray,
         _hitrec: &HitRecord,
-        _rng: &mut rand::rngs::ThreadRng,
+        _rng: &mut rand::rngs::SmallRng,
     ) -> MaterialScatterResult {
         MaterialScatterResult::new(
             Behaviour::Absorb,

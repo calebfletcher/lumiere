@@ -30,7 +30,7 @@ pub trait Material: fmt::Debug {
         &self,
         r: &Ray,
         hitrec: &HitRecord,
-        rng: &mut rand::rngs::ThreadRng,
+        rng: &mut rand::rngs::SmallRng,
     ) -> MaterialScatterResult;
 
     fn emitted(&self, _u: f64, _v: f64, _p: &Point3) -> Colour {

@@ -27,7 +27,7 @@ impl Material for Dielectric {
         &self,
         r: &Ray,
         hitrec: &HitRecord,
-        rng: &mut rand::rngs::ThreadRng,
+        rng: &mut rand::rngs::SmallRng,
     ) -> MaterialScatterResult {
         let refraction_ratio = if hitrec.front_face {
             1.0 / self.ir
