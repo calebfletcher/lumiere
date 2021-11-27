@@ -1,4 +1,5 @@
 use indicatif::{ProgressBar, ProgressStyle};
+use rand::{seq::SliceRandom, thread_rng};
 use std::io;
 
 use crate::{
@@ -47,13 +48,18 @@ impl Scene {
         pb.set_style(ProgressStyle::default_bar()
             .template("{spinner:.green} [{elapsed_precise}] [{wide_bar:.cyan/blue}] {percent}% ({eta_precise})"));
 
-        #[allow(clippy::needless_range_loop)]
-        for row in 0..self.image_height {
-            for col in 0..self.image_width {
+        let mut rows: Vec<usize> = (0..self.image_height).collect();
+        let mut cols: Vec<usize> = (0..self.image_width).collect();
+        rows.shuffle(&mut thread_rng());
+        cols.shuffle(&mut thread_rng());
+
+        let mut count = 0;
+        for row in &rows {
+            for col in &cols {
                 let mut pixel_colour = Colour::zeros();
                 for _ in 0..self.samples_per_pixel {
-                    let u = (col as f64 + rng.gen::<f64>()) / (self.image_width - 1) as f64;
-                    let v = (row as f64 + rng.gen::<f64>()) / (self.image_height - 1) as f64;
+                    let u = (*col as f64 + rng.gen::<f64>()) / (self.image_width - 1) as f64;
+                    let v = (*row as f64 + rng.gen::<f64>()) / (self.image_height - 1) as f64;
                     let r = self.camera.get_ray(u, v, rng);
                     pixel_colour += self.ray_colour(&r, self.max_depth, rng);
                 }
@@ -64,7 +70,9 @@ impl Scene {
                 pixel_buffer[pixel_offset + 1] = (pixel_colour.y.sqrt() * 255.999) as u8;
                 pixel_buffer[pixel_offset + 2] = (pixel_colour.z.sqrt() * 255.999) as u8;
             }
-            pb.set_position(row as u64)
+
+            count += 1;
+            pb.set_position(count);
         }
 
         Ok(())
