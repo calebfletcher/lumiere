@@ -1,12 +1,12 @@
-use std::mem;
+use std::{mem, ops::Add};
 
-use crate::{interval::Interval, ray::Ray, Point3};
+use crate::{interval::Interval, ray::Ray, vec3::Vec3, Point3};
 
 #[derive(Debug, Clone)]
 pub struct AABB {
-    x: Interval,
-    y: Interval,
-    z: Interval,
+    pub x: Interval,
+    pub y: Interval,
+    pub z: Interval,
 }
 
 impl AABB {
@@ -82,6 +82,42 @@ impl AABB {
             y: new_y,
             z: new_z,
         }
+    }
+}
+
+impl Add<Vec3> for &AABB {
+    type Output = AABB;
+
+    fn add(self, rhs: Vec3) -> Self::Output {
+        AABB {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+            z: self.z + rhs.z,
+        }
+    }
+}
+
+impl Add<&AABB> for Vec3 {
+    type Output = AABB;
+
+    fn add(self, rhs: &AABB) -> Self::Output {
+        rhs + self
+    }
+}
+
+impl Add<Vec3> for AABB {
+    type Output = AABB;
+
+    fn add(self, rhs: Vec3) -> Self::Output {
+        &self + rhs
+    }
+}
+
+impl Add<AABB> for Vec3 {
+    type Output = AABB;
+
+    fn add(self, rhs: AABB) -> Self::Output {
+        rhs + self
     }
 }
 
