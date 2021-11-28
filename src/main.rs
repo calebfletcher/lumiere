@@ -452,8 +452,18 @@ pub fn example_cornell_box(_rng: &mut rngs::SmallRng) -> (camera::Camera, object
         Vec3::new(0., 0., 555.),
         Vec3::new(555., 0., 0.),
         Vec3::new(0., 555., 0.),
-        white,
+        white.clone(),
     )));
 
+    world.add(object::quad::new_box(
+        &Point3::new(130., 0., 65.),
+        &Point3::new(295., 165., 230.),
+        white.clone(),
+    ));
+    world.add(object::quad::new_box(
+        &Point3::new(265., 0., 295.),
+        &Point3::new(430., 330., 460.),
+        white.clone(),
+    ));
     (camera, world)
 }

@@ -78,6 +78,62 @@ impl Hittable for Quad {
     }
 }
 
+pub fn new_box<'a>(a: &Point3, b: &Point3, mat: Rc<dyn material::Material>) -> Box<HittableList> {
+    let mut sides = Box::new(HittableList::new());
+
+    let min = Point3::new(a.x.min(b.x), a.y.min(b.y), a.z.min(b.z));
+    let max = Point3::new(a.x.max(b.x), a.y.max(b.y), a.z.max(b.z));
+
+    let dx = Vec3::new(max.x - min.x, 0., 0.);
+    let dy = Vec3::new(0., max.y - min.y, 0.);
+    let dz = Vec3::new(0., 0., max.z - min.z);
+
+    // Front
+    sides.add(Box::new(Quad::new(
+        Point3::new(min.x, min.y, max.z),
+        dx,
+        dy,
+        mat.clone(),
+    )));
+    // Right
+    sides.add(Box::new(Quad::new(
+        Point3::new(max.x, min.y, max.z),
+        -dz,
+        dy,
+        mat.clone(),
+    )));
+    // Back
+    sides.add(Box::new(Quad::new(
+        Point3::new(max.x, min.y, min.z),
+        -dx,
+        dy,
+        mat.clone(),
+    )));
+    // Left
+    sides.add(Box::new(Quad::new(
+        Point3::new(min.x, min.y, min.z),
+        dz,
+        dy,
+        mat.clone(),
+    )));
+    // Top
+    sides.add(Box::new(Quad::new(
+        Point3::new(min.x, max.y, max.z),
+        dx,
+        -dz,
+        mat.clone(),
+    )));
+    // Bottom
+    sides.add(Box::new(Quad::new(
+        Point3::new(min.x, min.y, min.z),
+        dx,
+        dz,
+        mat.clone(),
+    )));
+
+    sides
+}
+
 #[cfg(test)]
 mod tests {
     use std::rc::Rc;
