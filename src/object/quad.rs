@@ -78,8 +78,8 @@ impl Hittable for Quad {
     }
 }
 
-pub fn new_box<'a>(a: &Point3, b: &Point3, mat: Rc<dyn material::Material>) -> Box<HittableList> {
-    let mut sides = Box::new(HittableList::new());
+pub fn new_box<'a>(a: &Point3, b: &Point3, mat: Rc<dyn material::Material>) -> HittableList {
+    let mut sides = HittableList::new();
 
     let min = Point3::new(a.x.min(b.x), a.y.min(b.y), a.z.min(b.z));
     let max = Point3::new(a.x.max(b.x), a.y.max(b.y), a.z.max(b.z));

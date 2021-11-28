@@ -1,8 +1,13 @@
 use std::{error::Error, path::Path, rc::Rc};
 
 use lumiere::{
-    bvh::BVHNode, camera, image, material, object, scene::Scene, texture, vec3::Vec3, Colour,
-    Point3,
+    bvh::BVHNode,
+    camera, image, material,
+    object::{self, rotate::RotateY, Translate},
+    scene::Scene,
+    texture,
+    vec3::Vec3,
+    Colour, Point3,
 };
 use rand::{rngs, Rng, SeedableRng};
 
@@ -10,10 +15,10 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut rng = rngs::SmallRng::from_entropy();
 
     // Image parameters
-    const ASPECT_RATIO: f64 = 16. / 9.;
-    const IMAGE_WIDTH: usize = 600;
+    const ASPECT_RATIO: f64 = 9. / 9.;
+    const IMAGE_WIDTH: usize = 1024;
     const IMAGE_HEIGHT: usize = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as usize;
-    let samples_per_pixel: usize = 300;
+    let samples_per_pixel: usize = 5000;
     let max_depth = 50;
 
     // Pixel array as height * rows * channels 8 bit values
@@ -21,7 +26,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut pixels = vec![0_u8; BUFFER_LENGTH];
 
     // Generate the objects
-    let (camera, world) = example_cornell_box(&mut rng);
+    let (camera, world) = example_cornell_box(ASPECT_RATIO, &mut rng);
 
     // Generate BVH tree
     let mut bvh_root = object::HittableList::new();
@@ -48,13 +53,17 @@ fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-pub fn example_earth_scene(_rng: &mut rngs::SmallRng) -> (camera::Camera, object::HittableList) {
+pub fn example_earth_scene(
+    aspect_ratio: f64,
+    _rng: &mut rngs::SmallRng,
+) -> (camera::Camera, object::HittableList) {
     // Camera
     let camera_look_dir = Point3::new(0., 0., -12.);
     let camera = camera::CameraBuilder::new()
         .origin(Point3::new(0., 0., 12.))
         .look_dir(camera_look_dir)
         .fov(30.)
+        .aspect_ratio(aspect_ratio)
         .aperture(0.1)
         .focus_dist(10.)
         .build();
@@ -74,13 +83,17 @@ pub fn example_earth_scene(_rng: &mut rngs::SmallRng) -> (camera::Camera, object
     (camera, world)
 }
 
-pub fn example_basic_scene(_rng: &mut rngs::SmallRng) -> (camera::Camera, object::HittableList) {
+pub fn example_basic_scene(
+    aspect_ratio: f64,
+    _rng: &mut rngs::SmallRng,
+) -> (camera::Camera, object::HittableList) {
     // Camera
     let camera_look_dir = Point3::new(-13., -2., -3.);
     let camera = camera::CameraBuilder::new()
         .origin(Point3::new(13., 2., 3.))
         .look_dir(camera_look_dir)
         .fov(20.)
+        .aspect_ratio(aspect_ratio)
         .aperture(0.1)
         .focus_dist(10.)
         .build();
@@ -118,6 +131,7 @@ pub fn example_basic_scene(_rng: &mut rngs::SmallRng) -> (camera::Camera, object
 }
 
 pub fn example_two_spheres_scene(
+    aspect_ratio: f64,
     _rng: &mut rngs::SmallRng,
 ) -> (camera::Camera, object::HittableList) {
     // Camera
@@ -126,6 +140,7 @@ pub fn example_two_spheres_scene(
         .origin(Point3::new(13., 2., 3.))
         .look_dir(camera_look_dir)
         .fov(20.)
+        .aspect_ratio(aspect_ratio)
         .aperture(0.)
         .focus_dist(10.)
         .build();
@@ -158,6 +173,7 @@ pub fn example_two_spheres_scene(
 }
 
 pub fn example_two_perlin_spheres_scene(
+    aspect_ratio: f64,
     _rng: &mut rngs::SmallRng,
 ) -> (camera::Camera, object::HittableList) {
     // Camera
@@ -166,6 +182,7 @@ pub fn example_two_perlin_spheres_scene(
         .origin(Point3::new(13., 2., 3.))
         .look_dir(camera_look_dir)
         .fov(20.)
+        .aspect_ratio(aspect_ratio)
         .aperture(0.)
         .focus_dist(10.)
         .build();
@@ -193,13 +210,17 @@ pub fn example_two_perlin_spheres_scene(
     (camera, world)
 }
 
-pub fn example_complex_scene(rng: &mut rngs::SmallRng) -> (camera::Camera, object::HittableList) {
+pub fn example_complex_scene(
+    aspect_ratio: f64,
+    rng: &mut rngs::SmallRng,
+) -> (camera::Camera, object::HittableList) {
     // Camera
     let camera_look_dir = Point3::new(-13., -2., -3.);
     let camera = camera::CameraBuilder::new()
         .origin(Point3::new(13., 2., 3.))
         .look_dir(camera_look_dir)
         .fov(20.)
+        .aspect_ratio(aspect_ratio)
         .aperture(0.1)
         .focus_dist(10.)
         .build();
@@ -287,13 +308,17 @@ pub fn example_complex_scene(rng: &mut rngs::SmallRng) -> (camera::Camera, objec
     (camera, world)
 }
 
-pub fn example_quads_scene(_rng: &mut rngs::SmallRng) -> (camera::Camera, object::HittableList) {
+pub fn example_quads_scene(
+    aspect_ratio: f64,
+    _rng: &mut rngs::SmallRng,
+) -> (camera::Camera, object::HittableList) {
     // Camera
     let camera_look_dir = Point3::new(0., 0., -9.);
     let camera = camera::CameraBuilder::new()
         .origin(Point3::new(0., 0., 9.))
         .look_dir(camera_look_dir)
         .fov(80.)
+        .aspect_ratio(aspect_ratio)
         .aperture(0.)
         .focus_dist(10.)
         .build();
@@ -344,6 +369,7 @@ pub fn example_quads_scene(_rng: &mut rngs::SmallRng) -> (camera::Camera, object
 }
 
 pub fn example_simple_light_scene(
+    aspect_ratio: f64,
     _rng: &mut rngs::SmallRng,
 ) -> (camera::Camera, object::HittableList) {
     // Camera
@@ -352,6 +378,7 @@ pub fn example_simple_light_scene(
         .origin(Point3::new(26., 3., 6.))
         .look_dir(camera_look_dir)
         .fov(20.)
+        .aspect_ratio(aspect_ratio)
         .aperture(0.)
         .focus_dist(10.)
         .build();
@@ -392,13 +419,17 @@ pub fn example_simple_light_scene(
     (camera, world)
 }
 
-pub fn example_cornell_box(_rng: &mut rngs::SmallRng) -> (camera::Camera, object::HittableList) {
+pub fn example_cornell_box(
+    aspect_ratio: f64,
+    _rng: &mut rngs::SmallRng,
+) -> (camera::Camera, object::HittableList) {
     // Camera
     let camera_look_dir = Point3::new(0., 0., 1.);
     let camera = camera::CameraBuilder::new()
         .origin(Point3::new(278., 278., -800.))
         .look_dir(camera_look_dir)
         .fov(40.)
+        .aspect_ratio(aspect_ratio)
         .aperture(0.)
         .build();
 
@@ -455,15 +486,23 @@ pub fn example_cornell_box(_rng: &mut rngs::SmallRng) -> (camera::Camera, object
         white.clone(),
     )));
 
-    world.add(object::quad::new_box(
-        &Point3::new(130., 0., 65.),
-        &Point3::new(295., 165., 230.),
+    let box1 = Rc::new(object::quad::new_box(
+        &Point3::new(0., 0., 0.),
+        &Point3::new(165., 330., 165.),
         white.clone(),
     ));
-    world.add(object::quad::new_box(
-        &Point3::new(265., 0., 295.),
-        &Point3::new(430., 330., 460.),
+    let box1 = Rc::new(RotateY::new(box1, 15.));
+    let box1 = Box::new(Translate::new(box1, Vec3::new(265., 0., 295.)));
+    world.add(box1);
+
+    let box2 = Rc::new(object::quad::new_box(
+        &Point3::new(0., 0., 0.),
+        &Point3::new(165., 165., 165.),
         white.clone(),
     ));
+    let box2 = Rc::new(RotateY::new(box2, -18.));
+    let box2 = Box::new(Translate::new(box2, Vec3::new(130., 0., 65.)));
+    world.add(box2);
+
     (camera, world)
 }
