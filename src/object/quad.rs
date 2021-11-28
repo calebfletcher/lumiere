@@ -6,7 +6,6 @@ use super::{Hittable, HittableList};
 
 #[derive(Debug)]
 pub struct Quad {
-    name: String,
     q: Point3,
     u: Vec3,
     v: Vec3,
@@ -18,14 +17,13 @@ pub struct Quad {
 }
 
 impl Quad {
-    pub fn new(name: String, q: Point3, u: Vec3, v: Vec3, mat: Rc<dyn material::Material>) -> Self {
+    pub fn new(q: Point3, u: Vec3, v: Vec3, mat: Rc<dyn material::Material>) -> Self {
         let aabb = AABB::from_points(q, q + u + v).pad();
         let n = u.cross(v);
         let normal = n.unit();
         let d = normal.dot(q);
         let w = n / n.length_squared();
         Self {
-            name,
             q,
             u,
             v,
@@ -75,10 +73,6 @@ impl Hittable for Quad {
         Some(hitrec)
     }
 
-    fn name(&self) -> String {
-        self.name.clone()
-    }
-
     fn bounding_box(&self) -> &AABB {
         &self.aabb
     }
@@ -98,7 +92,7 @@ mod tests {
         let q = Vec3::new(-0.5, -0.5, 1.);
         let u = Vec3::new(1., 0., 0.);
         let v = Vec3::new(0., 1., 0.);
-        let quad = Quad::new("".to_string(), q, u, v, mat);
+        let quad = Quad::new(q, u, v, mat);
 
         let ray_origin = Point3::new(0., 0., 0.);
         let ray_direction = Vec3::new(0., 0., 1.);
@@ -119,7 +113,7 @@ mod tests {
         let q = Vec3::new(-0.5, -0.5, 1.);
         let u = Vec3::new(1., 0., 0.);
         let v = Vec3::new(0., 1., 0.);
-        let quad = Quad::new("".to_string(), q, u, v, mat);
+        let quad = Quad::new(q, u, v, mat);
 
         let ray_origin = Point3::new(0.4, 0.4, 0.);
         let ray_direction = Vec3::new(0., 0., 1.);
@@ -140,7 +134,7 @@ mod tests {
         let q = Vec3::new(-0.5, -0.5, 1.);
         let u = Vec3::new(1., 0., 0.);
         let v = Vec3::new(0., 1., 0.);
-        let quad = Quad::new("".to_string(), q, u, v, mat);
+        let quad = Quad::new(q, u, v, mat);
 
         let ray_origin = Point3::new(0., 0., 0.);
 
@@ -203,7 +197,6 @@ mod tests {
     fn hit_top() {
         let back_green = Rc::new(material::Lambertian::from_colour(Colour::new(0.2, 1., 0.2)));
         let green = Box::new(Quad::new(
-            "".to_string(),
             Point3::new(-2., -2., 0.),
             Vec3::new(4., 0., 0.),
             Vec3::new(0., 4., 0.),

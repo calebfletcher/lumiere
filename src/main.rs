@@ -13,7 +13,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     const ASPECT_RATIO: f64 = 16. / 9.;
     const IMAGE_WIDTH: usize = 600;
     const IMAGE_HEIGHT: usize = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as usize;
-    let samples_per_pixel: usize = 3000;
+    let samples_per_pixel: usize = 300;
     let max_depth = 50;
 
     // Pixel array as height * rows * channels 8 bit values
@@ -66,7 +66,6 @@ pub fn example_earth_scene(_rng: &mut rngs::SmallRng) -> (camera::Camera, object
         texture::ImageTexture::new("earthmap.png"),
     )));
     world.add(Box::new(object::Sphere::new(
-        "obj4".to_string(),
         Point3::new(0., 0., 0.),
         2.,
         material_4,
@@ -94,7 +93,6 @@ pub fn example_basic_scene(_rng: &mut rngs::SmallRng) -> (camera::Camera, object
         0.5, 0.5, 0.5,
     )));
     world.add(Box::new(object::Sphere::new(
-        "ground".to_string(),
         Point3::new(0., -1000., 0.),
         1000.,
         material_ground,
@@ -102,7 +100,6 @@ pub fn example_basic_scene(_rng: &mut rngs::SmallRng) -> (camera::Camera, object
 
     let material_3 = Rc::new(material::Metal::new(Colour::new(0.7, 0.6, 0.5), 0.0));
     world.add(Box::new(object::Sphere::new(
-        "obj3".to_string(),
         Point3::new(4., 1., 0.),
         1.,
         material_3,
@@ -112,7 +109,6 @@ pub fn example_basic_scene(_rng: &mut rngs::SmallRng) -> (camera::Camera, object
         0.7, 0.1, 0.5,
     )));
     world.add(Box::new(object::Sphere::new(
-        "obj4".to_string(),
         Point3::new(7., 1., 0.),
         0.4,
         material_4,
@@ -145,7 +141,6 @@ pub fn example_two_spheres_scene(
     ));
     let material_1 = Rc::new(material::Lambertian::new(checker.clone()));
     world.add(Box::new(object::Sphere::new(
-        "sphere_1".to_string(),
         Point3::new(0., -10., 0.),
         10.,
         material_1,
@@ -154,7 +149,6 @@ pub fn example_two_spheres_scene(
     // Sphere 2
     let material_2 = Rc::new(material::Lambertian::new(checker));
     world.add(Box::new(object::Sphere::new(
-        "sphere_1".to_string(),
         Point3::new(0., 10., 0.),
         10.,
         material_2,
@@ -183,7 +177,6 @@ pub fn example_two_perlin_spheres_scene(
     let texture_1 = Rc::new(texture::NoiseTexture::new());
     let material_1 = Rc::new(material::Lambertian::new(texture_1.clone()));
     world.add(Box::new(object::Sphere::new(
-        "sphere_1".to_string(),
         Point3::new(0., -1000., 0.),
         1000.,
         material_1,
@@ -192,7 +185,6 @@ pub fn example_two_perlin_spheres_scene(
     // Sphere 2
     let material_2 = Rc::new(material::Lambertian::new(texture_1));
     world.add(Box::new(object::Sphere::new(
-        "sphere_1".to_string(),
         Point3::new(0., 2., 0.),
         2.,
         material_2,
@@ -223,7 +215,6 @@ pub fn example_complex_scene(rng: &mut rngs::SmallRng) -> (camera::Camera, objec
     ));
     let material_ground = Rc::new(material::Lambertian::new(checker));
     world.add(Box::new(object::Sphere::new(
-        "ground".to_string(),
         Point3::new(0., -1000., 0.),
         1000.,
         material_ground,
@@ -247,7 +238,6 @@ pub fn example_complex_scene(rng: &mut rngs::SmallRng) -> (camera::Camera, objec
                         let sphere_material = Rc::new(material::Lambertian::from_colour(albedo));
                         let centre_1 = centre; // + Vec3::new(0., rng.gen_range(0.0..=0.5), 0.);
                         world.add(Box::new(object::MovingSphere::new(
-                            "".to_string(),
                             centre,
                             centre_1,
                             0.2,
@@ -259,22 +249,12 @@ pub fn example_complex_scene(rng: &mut rngs::SmallRng) -> (camera::Camera, objec
                         let albedo = Colour::random_in_range_inclusive(rng, 0.5..=1.0);
                         let fuzziness: f64 = rng.gen_range(0.0..0.5);
                         let sphere_material = Rc::new(material::Metal::new(albedo, fuzziness));
-                        world.add(Box::new(object::Sphere::new(
-                            "".to_string(),
-                            centre,
-                            0.2,
-                            sphere_material,
-                        )));
+                        world.add(Box::new(object::Sphere::new(centre, 0.2, sphere_material)));
                     }
                     _ => {
                         // glass
                         let sphere_material = Rc::new(material::Dielectric::new(1.5));
-                        world.add(Box::new(object::Sphere::new(
-                            "".to_string(),
-                            centre,
-                            0.2,
-                            sphere_material,
-                        )));
+                        world.add(Box::new(object::Sphere::new(centre, 0.2, sphere_material)));
                     }
                 }
             }
@@ -283,7 +263,6 @@ pub fn example_complex_scene(rng: &mut rngs::SmallRng) -> (camera::Camera, objec
 
     let material_1 = Rc::new(material::Dielectric::new(1.5));
     world.add(Box::new(object::Sphere::new(
-        "obj1".to_string(),
         Point3::new(0., 1., 0.),
         1.,
         material_1,
@@ -293,7 +272,6 @@ pub fn example_complex_scene(rng: &mut rngs::SmallRng) -> (camera::Camera, objec
         0.4, 0.2, 0.1,
     )));
     world.add(Box::new(object::Sphere::new(
-        "obj2".to_string(),
         Point3::new(-4., 1., 0.),
         1.,
         material_2,
@@ -301,7 +279,6 @@ pub fn example_complex_scene(rng: &mut rngs::SmallRng) -> (camera::Camera, objec
 
     let material_3 = Rc::new(material::Metal::new(Colour::new(0.7, 0.6, 0.5), 0.0));
     world.add(Box::new(object::Sphere::new(
-        "obj3".to_string(),
         Point3::new(4., 1., 0.),
         1.,
         material_3,
@@ -333,35 +310,30 @@ pub fn example_quads_scene(_rng: &mut rngs::SmallRng) -> (camera::Camera, object
     )));
 
     world.add(Box::new(object::Quad::new(
-        "".to_string(),
         Point3::new(-3., -2., 5.),
         Vec3::new(0., 0., -4.),
         Vec3::new(0., 4., 0.),
         left_red,
     )));
     world.add(Box::new(object::Quad::new(
-        "".to_string(),
         Point3::new(-2., -2., 0.),
         Vec3::new(4., 0., 0.),
         Vec3::new(0., 4., 0.),
         back_green,
     )));
     world.add(Box::new(object::Quad::new(
-        "".to_string(),
         Point3::new(3., -2., 1.),
         Vec3::new(0., 0., 4.),
         Vec3::new(0., 4., 0.),
         right_blue,
     )));
     world.add(Box::new(object::Quad::new(
-        "".to_string(),
         Point3::new(-2., 3., 1.),
         Vec3::new(4., 0., 0.),
         Vec3::new(0., 0., 4.),
         upper_orange,
     )));
     world.add(Box::new(object::Quad::new(
-        "".to_string(),
         Point3::new(-2., -3., 5.),
         Vec3::new(4., 0., 0.),
         Vec3::new(0., 0., -4.),
@@ -390,7 +362,6 @@ pub fn example_simple_light_scene(
     let noise = Rc::new(texture::NoiseTexture::new());
     let noise_texture = Rc::new(material::Lambertian::new(noise.clone()));
     world.add(Box::new(object::Sphere::new(
-        "".to_string(),
         Point3::new(0., -1000., 0.),
         1000.,
         noise_texture,
@@ -398,7 +369,6 @@ pub fn example_simple_light_scene(
 
     let noise_texture = Rc::new(material::Lambertian::new(noise));
     world.add(Box::new(object::Sphere::new(
-        "".to_string(),
         Point3::new(0., 2., 0.),
         2.,
         noise_texture,
@@ -406,7 +376,6 @@ pub fn example_simple_light_scene(
 
     let diff_light = Rc::new(material::DiffuseLight::from_colour(Colour::new(4., 4., 4.)));
     world.add(Box::new(object::Quad::new(
-        "".to_string(),
         Point3::new(3., 1., -2.),
         Point3::new(2., 0., 0.),
         Point3::new(0., 2., 0.),
@@ -415,7 +384,6 @@ pub fn example_simple_light_scene(
 
     let diff_light = Rc::new(material::DiffuseLight::from_colour(Colour::new(4., 4., 4.)));
     world.add(Box::new(object::Sphere::new(
-        "".to_string(),
         Point3::new(0., 7., 0.),
         2.,
         diff_light,
@@ -451,42 +419,36 @@ pub fn example_cornell_box(_rng: &mut rngs::SmallRng) -> (camera::Camera, object
     )));
 
     world.add(Box::new(object::Quad::new(
-        "".to_string(),
         Vec3::new(555., 0., 0.),
         Vec3::new(0., 555., 0.),
         Vec3::new(0., 0., 555.),
         green,
     )));
     world.add(Box::new(object::Quad::new(
-        "".to_string(),
         Vec3::new(0., 0., 0.),
         Vec3::new(0., 555., 0.),
         Vec3::new(0., 0., 555.),
         red,
     )));
     world.add(Box::new(object::Quad::new(
-        "".to_string(),
         Vec3::new(343., 554., 332.),
         Vec3::new(-130., 0., 0.),
         Vec3::new(0., 0., -105.),
         light,
     )));
     world.add(Box::new(object::Quad::new(
-        "".to_string(),
         Vec3::new(0., 0., 0.),
         Vec3::new(555., 0., 0.),
         Vec3::new(0., 0., 555.),
         white.clone(),
     )));
     world.add(Box::new(object::Quad::new(
-        "".to_string(),
         Vec3::new(555., 555., 555.),
         Vec3::new(-555., 0., 0.),
         Vec3::new(0., 0., -555.),
         white.clone(),
     )));
     world.add(Box::new(object::Quad::new(
-        "".to_string(),
         Vec3::new(0., 0., 555.),
         Vec3::new(555., 0., 0.),
         Vec3::new(0., 555., 0.),

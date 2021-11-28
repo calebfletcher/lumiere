@@ -108,10 +108,6 @@ impl Hittable for BVHNode {
         }
     }
 
-    fn name(&self) -> String {
-        "bvh".to_string()
-    }
-
     fn bounding_box(&self) -> &AABB {
         &self.bbox
     }

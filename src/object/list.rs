@@ -47,10 +47,6 @@ impl Hittable for HittableList {
         hitrec
     }
 
-    fn name(&self) -> String {
-        String::from("world")
-    }
-
     fn bounding_box(&self) -> &AABB {
         &self.bbox
     }

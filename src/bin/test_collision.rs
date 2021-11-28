@@ -13,12 +13,7 @@ fn main() {
     let mut rng = rand::rngs::SmallRng::from_entropy();
     let material_centre = Rc::new(material::Dielectric::new(1.5));
 
-    let sphere = object::Sphere::new(
-        String::from("glass ball"),
-        Point3::new(2., 0., 0.),
-        0.5,
-        material_centre,
-    );
+    let sphere = object::Sphere::new(Point3::new(2., 0., 0.), 0.5, material_centre);
 
     let origin = Vec3::new(0., -0.3, 0.);
     let direction = Vec3::new(1., 0., 0.);

@@ -6,7 +6,6 @@ use super::object;
 
 #[derive(Debug)]
 pub struct MovingSphere {
-    name: String,
     centre_0: Point3,
     #[allow(dead_code)]
     centre_1: Point3,
@@ -18,7 +17,6 @@ pub struct MovingSphere {
 
 impl MovingSphere {
     pub fn new(
-        name: String,
         centre_0: Point3,
         centre_1: Point3,
         radius: f64,
@@ -29,7 +27,6 @@ impl MovingSphere {
         let box1 = AABB::from_points(centre_1 - rvec, centre_1 + rvec);
 
         Self {
-            name,
             centre_0,
             centre_1,
             centre_vec: centre_1 - centre_0,
@@ -89,10 +86,6 @@ impl object::Hittable for MovingSphere {
             object::HitRecord::new(intersection, outward_normal, root, u, v, &self.mat);
         hitrec.set_face_normal(r, outward_normal);
         Some(hitrec)
-    }
-
-    fn name(&self) -> String {
-        self.name.clone()
     }
 
     fn bounding_box(&self) -> &AABB {

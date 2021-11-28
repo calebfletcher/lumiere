@@ -45,6 +45,5 @@ impl<'a> HitRecord<'a> {
 
 pub trait Hittable: fmt::Debug {
     fn hit(&self, r: &Ray, ray_t: &interval::Interval) -> Option<HitRecord>;
-    fn name(&self) -> String;
     fn bounding_box(&self) -> &AABB;
 }

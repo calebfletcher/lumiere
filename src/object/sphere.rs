@@ -6,7 +6,6 @@ use super::object;
 
 #[derive(Debug)]
 pub struct Sphere {
-    name: String,
     centre: Point3,
     radius: f64,
     mat: Rc<dyn material::Material>,
@@ -14,11 +13,10 @@ pub struct Sphere {
 }
 
 impl Sphere {
-    pub fn new(name: String, centre: Point3, radius: f64, mat: Rc<dyn material::Material>) -> Self {
+    pub fn new(centre: Point3, radius: f64, mat: Rc<dyn material::Material>) -> Self {
         let rvec = Vec3::new(radius, radius, radius);
         let aabb = AABB::from_points(centre - rvec, centre + rvec);
         Self {
-            name,
             centre,
             radius,
             mat,
@@ -72,10 +70,6 @@ impl object::Hittable for Sphere {
             object::HitRecord::new(intersection, outward_normal, root, u, v, &self.mat);
         hitrec.set_face_normal(r, outward_normal);
         Some(hitrec)
-    }
-
-    fn name(&self) -> String {
-        self.name.clone()
     }
 
     fn bounding_box(&self) -> &AABB {
