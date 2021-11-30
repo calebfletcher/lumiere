@@ -13,7 +13,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     const ASPECT_RATIO: f64 = 16. / 9.;
     const IMAGE_WIDTH: usize = 400;
     const IMAGE_HEIGHT: usize = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as usize;
-    let samples_per_pixel: usize = 2000;
+    let samples_per_pixel: usize = 1000;
     let max_depth = 50;
 
     // Pixel array as height * rows * channels 8 bit values

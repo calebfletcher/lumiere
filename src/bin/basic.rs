@@ -1,8 +1,6 @@
 use std::{error::Error, path::Path, rc::Rc};
 
-use lumiere::{
-    bvh::BVHNode, camera, image, material, object, scene::Scene, texture, Colour, Point3,
-};
+use lumiere::{bvh::BVHNode, camera, image, material, object, scene::Scene, Colour, Point3};
 
 use rand::{rngs, SeedableRng};
 
@@ -11,9 +9,9 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // Image parameters
     const ASPECT_RATIO: f64 = 16. / 9.;
-    const IMAGE_WIDTH: usize = 400;
+    const IMAGE_WIDTH: usize = 1024;
     const IMAGE_HEIGHT: usize = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as usize;
-    let samples_per_pixel: usize = 2000;
+    let samples_per_pixel: usize = 5000;
     let max_depth = 50;
 
     // Pixel array as height * rows * channels 8 bit values
@@ -23,47 +21,43 @@ fn main() -> Result<(), Box<dyn Error>> {
     // Generate the objects
 
     // Camera
-    let camera_look_dir = Point3::new(-26., -1., -6.);
+    let camera_look_dir = Point3::new(-13., -2., -3.);
     let camera = camera::CameraBuilder::new()
-        .origin(Point3::new(26., 3., 6.))
+        .origin(Point3::new(13., 2., 3.))
         .look_dir(camera_look_dir)
         .fov(20.)
         .aspect_ratio(ASPECT_RATIO)
-        .aperture(0.)
+        .aperture(0.1)
         .focus_dist(10.)
         .build();
 
     // World
     let mut world = object::HittableList::new();
 
-    let noise = Rc::new(texture::NoiseTexture::new());
-    let noise_texture = Rc::new(material::Lambertian::new(noise.clone()));
+    // Ground
+    let material_ground = Rc::new(material::Lambertian::from_colour(Colour::new(
+        0.5, 0.5, 0.5,
+    )));
     world.add(Box::new(object::Sphere::new(
         Point3::new(0., -1000., 0.),
         1000.,
-        noise_texture,
+        material_ground,
     )));
 
-    let noise_texture = Rc::new(material::Lambertian::new(noise));
+    let material_3 = Rc::new(material::Metal::new(Colour::new(0.7, 0.6, 0.5), 0.0));
     world.add(Box::new(object::Sphere::new(
-        Point3::new(0., 2., 0.),
-        2.,
-        noise_texture,
+        Point3::new(4., 1., 0.),
+        1.,
+        material_3,
     )));
 
-    let diff_light = Rc::new(material::DiffuseLight::from_colour(Colour::new(4., 4., 4.)));
-    world.add(Box::new(object::Quad::new(
-        Point3::new(3., 1., -2.),
-        Point3::new(2., 0., 0.),
-        Point3::new(0., 2., 0.),
-        diff_light,
+    let material_4 = Rc::new(material::Lambertian::from_colour(Colour::new(
+        0.7, 0.1, 0.5,
     )));
-
-    let diff_light = Rc::new(material::DiffuseLight::from_colour(Colour::new(4., 4., 4.)));
     world.add(Box::new(object::Sphere::new(
-        Point3::new(0., 7., 0.),
-        2.,
-        diff_light,
+        Point3::new(7., 1., 0.),
+        0.4,
+        material_4,
     )));
 
     // Generate BVH tree
@@ -78,7 +72,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         samples_per_pixel,
         IMAGE_WIDTH,
         IMAGE_HEIGHT,
-        Colour::new(0., 0., 0.),
+        Colour::new(0.7, 0.8, 1.),
     );
 
     // Render the scene to a frame buffer
