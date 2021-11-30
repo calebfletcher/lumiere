@@ -84,7 +84,7 @@ impl Scene {
         }
         match self
             .world
-            .hit(r, &interval::Interval::new(0.001, f64::INFINITY))
+            .hit(r, &interval::Interval::new(0.001, f64::INFINITY), rng)
         {
             Some(hitrec) => {
                 // Ray intersects object

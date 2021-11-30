@@ -1,5 +1,7 @@
 use std::{f64::consts, rc::Rc};
 
+use rand::rngs;
+
 use crate::{aabb::AABB, interval, material, ray::Ray, vec3::Vec3, Point3};
 
 use super::object;
@@ -58,7 +60,12 @@ impl MovingSphere {
 }
 
 impl object::Hittable for MovingSphere {
-    fn hit(&self, r: &Ray, ray_t: &interval::Interval) -> Option<object::HitRecord> {
+    fn hit(
+        &self,
+        r: &Ray,
+        ray_t: &interval::Interval,
+        _rng: &mut rngs::SmallRng,
+    ) -> Option<object::HitRecord> {
         let oc = r.origin - self.centre(r.time);
         let a = r.direction.length_squared();
         let half_b = oc.dot(r.direction);

@@ -1,5 +1,7 @@
 use std::rc::Rc;
 
+use rand::rngs;
+
 use crate::{aabb::AABB, ray::Ray, vec3::Vec3, Point3};
 
 use super::Hittable;
@@ -57,6 +59,7 @@ impl Hittable for RotateY {
         &self,
         r: &crate::ray::Ray,
         ray_t: &crate::interval::Interval,
+        rng: &mut rngs::SmallRng,
     ) -> Option<super::HitRecord> {
         // Change the ray from world space to object space
         let mut origin = r.origin;
@@ -71,7 +74,7 @@ impl Hittable for RotateY {
         let rotated = Ray::new(origin, direction, r.time);
 
         // Determine if an intersection occurs in object space
-        let mut hitrec = self.object.hit(&rotated, ray_t)?;
+        let mut hitrec = self.object.hit(&rotated, ray_t, rng)?;
 
         // Change the intersection point from object space to world space
         let mut hit_point = hitrec.point;

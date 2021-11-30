@@ -1,5 +1,7 @@
 use std::rc::Rc;
 
+use rand::rngs;
+
 use crate::{aabb::AABB, interval::Interval, ray::Ray, vec3::Vec3};
 
 use super::Hittable;
@@ -23,10 +25,15 @@ impl Translate {
 }
 
 impl<'a> Hittable for Translate {
-    fn hit(&self, r: &crate::ray::Ray, ray_t: &Interval) -> Option<super::HitRecord> {
+    fn hit(
+        &self,
+        r: &crate::ray::Ray,
+        ray_t: &Interval,
+        rng: &mut rngs::SmallRng,
+    ) -> Option<super::HitRecord> {
         let offset_r = Ray::new(r.origin - self.offset, r.direction, r.time);
 
-        let mut hitrec = self.object.hit(&offset_r, ray_t)?;
+        let mut hitrec = self.object.hit(&offset_r, ray_t, rng)?;
 
         hitrec.point += self.offset;
 

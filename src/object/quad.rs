@@ -1,5 +1,7 @@
 use std::rc::Rc;
 
+use rand::rngs;
+
 use crate::{aabb::AABB, material, object, vec3::Vec3, Point3};
 
 use super::{Hittable, HittableList};
@@ -41,6 +43,7 @@ impl Hittable for Quad {
         &self,
         r: &crate::ray::Ray,
         ray_t: &crate::interval::Interval,
+        _rng: &mut rngs::SmallRng,
     ) -> Option<super::HitRecord> {
         let denom = self.normal.dot(r.direction.unit());
 
@@ -138,6 +141,8 @@ pub fn new_box<'a>(a: &Point3, b: &Point3, mat: Rc<dyn material::Material>) -> H
 mod tests {
     use std::rc::Rc;
 
+    use rand::{rngs, SeedableRng};
+
     use crate::{interval, material, object::Hittable, ray::Ray, vec3::Vec3, Colour, Point3};
 
     use super::Quad;
@@ -154,7 +159,7 @@ mod tests {
         let ray_direction = Vec3::new(0., 0., 1.);
         let r = Ray::new(ray_origin, ray_direction, 0.);
 
-        let hit_result = quad.hit(&r, &interval::UNIVERSE);
+        let hit_result = quad.hit(&r, &interval::UNIVERSE, &mut rngs::SmallRng::from_entropy());
 
         assert!(hit_result.is_some());
         let hit_result = hit_result.unwrap();
@@ -175,7 +180,7 @@ mod tests {
         let ray_direction = Vec3::new(0., 0., 1.);
         let r = Ray::new(ray_origin, ray_direction, 0.);
 
-        let hit_result = quad.hit(&r, &interval::UNIVERSE);
+        let hit_result = quad.hit(&r, &interval::UNIVERSE, &mut rngs::SmallRng::from_entropy());
 
         assert!(hit_result.is_some());
         let hit_result = hit_result.unwrap();
@@ -199,54 +204,78 @@ mod tests {
         // Ray 1
         let ray_direction = Vec3::new(0.2, 0., 1.);
         let r = Ray::new(ray_origin, ray_direction, 0.);
-        assert!(quad.hit(&r, &interval::UNIVERSE).is_some());
+        assert!(quad
+            .hit(&r, &interval::UNIVERSE, &mut rngs::SmallRng::from_entropy())
+            .is_some());
         // Ray 2
         let ray_direction = Vec3::new(-0.2, 0., 1.);
         let r = Ray::new(ray_origin, ray_direction, 0.);
-        assert!(quad.hit(&r, &interval::UNIVERSE).is_some());
+        assert!(quad
+            .hit(&r, &interval::UNIVERSE, &mut rngs::SmallRng::from_entropy())
+            .is_some());
         // Ray 3
         let ray_direction = Vec3::new(0., 0.2, 1.);
         let r = Ray::new(ray_origin, ray_direction, 0.);
-        assert!(quad.hit(&r, &interval::UNIVERSE).is_some());
+        assert!(quad
+            .hit(&r, &interval::UNIVERSE, &mut rngs::SmallRng::from_entropy())
+            .is_some());
         // Ray 4
         let ray_direction = Vec3::new(0., -0.2, 1.);
         let r = Ray::new(ray_origin, ray_direction, 0.);
-        assert!(quad.hit(&r, &interval::UNIVERSE).is_some());
+        assert!(quad
+            .hit(&r, &interval::UNIVERSE, &mut rngs::SmallRng::from_entropy())
+            .is_some());
         // Ray 5
         let ray_direction = Vec3::new(0.2, 0.2, 1.);
         let r = Ray::new(ray_origin, ray_direction, 0.);
-        assert!(quad.hit(&r, &interval::UNIVERSE).is_some());
+        assert!(quad
+            .hit(&r, &interval::UNIVERSE, &mut rngs::SmallRng::from_entropy())
+            .is_some());
         // Ray 6
         let ray_direction = Vec3::new(0.2, -0.2, 1.);
         let r = Ray::new(ray_origin, ray_direction, 0.);
-        assert!(quad.hit(&r, &interval::UNIVERSE).is_some());
+        assert!(quad
+            .hit(&r, &interval::UNIVERSE, &mut rngs::SmallRng::from_entropy())
+            .is_some());
         // Ray 7
         let ray_direction = Vec3::new(-0.2, 0.2, 1.);
         let r = Ray::new(ray_origin, ray_direction, 0.);
-        assert!(quad.hit(&r, &interval::UNIVERSE).is_some());
+        assert!(quad
+            .hit(&r, &interval::UNIVERSE, &mut rngs::SmallRng::from_entropy())
+            .is_some());
         // Ray 8
         let ray_direction = Vec3::new(-0.2, -0.2, 1.);
         let r = Ray::new(ray_origin, ray_direction, 0.);
-        assert!(quad.hit(&r, &interval::UNIVERSE).is_some());
+        assert!(quad
+            .hit(&r, &interval::UNIVERSE, &mut rngs::SmallRng::from_entropy())
+            .is_some());
 
         // Miss rays
 
         // Ray 1
         let ray_direction = Vec3::new(1., 1., 1.);
         let r = Ray::new(ray_origin, ray_direction, 0.);
-        assert!(quad.hit(&r, &interval::UNIVERSE).is_none());
+        assert!(quad
+            .hit(&r, &interval::UNIVERSE, &mut rngs::SmallRng::from_entropy())
+            .is_none());
         // Ray 2
         let ray_direction = Vec3::new(1., -1., 1.);
         let r = Ray::new(ray_origin, ray_direction, 0.);
-        assert!(quad.hit(&r, &interval::UNIVERSE).is_none());
+        assert!(quad
+            .hit(&r, &interval::UNIVERSE, &mut rngs::SmallRng::from_entropy())
+            .is_none());
         // Ray 3
         let ray_direction = Vec3::new(-1., 1., 1.);
         let r = Ray::new(ray_origin, ray_direction, 0.);
-        assert!(quad.hit(&r, &interval::UNIVERSE).is_none());
+        assert!(quad
+            .hit(&r, &interval::UNIVERSE, &mut rngs::SmallRng::from_entropy())
+            .is_none());
         // Ray 4
         let ray_direction = Vec3::new(-1., 1., 1.);
         let r = Ray::new(ray_origin, ray_direction, 0.);
-        assert!(quad.hit(&r, &interval::UNIVERSE).is_none());
+        assert!(quad
+            .hit(&r, &interval::UNIVERSE, &mut rngs::SmallRng::from_entropy())
+            .is_none());
     }
 
     #[test]
@@ -273,6 +302,8 @@ mod tests {
             time: 0.22690750755679256,
         };
 
-        assert!(green.hit(&r, &interval::UNIVERSE).is_none());
+        assert!(green
+            .hit(&r, &interval::UNIVERSE, &mut rngs::SmallRng::from_entropy())
+            .is_none());
     }
 }

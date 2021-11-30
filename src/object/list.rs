@@ -1,3 +1,5 @@
+use rand::rngs;
+
 use crate::{aabb::AABB, interval, ray};
 
 use super::Hittable;
@@ -33,12 +35,17 @@ impl Default for HittableList {
 }
 
 impl Hittable for HittableList {
-    fn hit(&self, r: &ray::Ray, ray_t: &interval::Interval) -> Option<super::HitRecord> {
+    fn hit(
+        &self,
+        r: &ray::Ray,
+        ray_t: &interval::Interval,
+        rng: &mut rngs::SmallRng,
+    ) -> Option<super::HitRecord> {
         let mut closest_so_far = ray_t.max;
         let mut hitrec = None;
         for object in &self.objects {
             let new_interval = interval::Interval::new(ray_t.min, closest_so_far);
-            if let Some(temp_hitrec) = object.hit(r, &new_interval) {
+            if let Some(temp_hitrec) = object.hit(r, &new_interval, rng) {
                 closest_so_far = temp_hitrec.t;
                 hitrec = Some(temp_hitrec);
             }

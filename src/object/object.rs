@@ -1,5 +1,7 @@
 use std::{fmt, rc::Rc};
 
+use rand::rngs;
+
 use crate::{aabb::AABB, interval, material, ray::Ray, vec3::Vec3, Point3};
 
 #[derive(Debug)]
@@ -44,6 +46,11 @@ impl<'a> HitRecord<'a> {
 }
 
 pub trait Hittable: fmt::Debug {
-    fn hit(&self, r: &Ray, ray_t: &interval::Interval) -> Option<HitRecord>;
+    fn hit(
+        &self,
+        r: &Ray,
+        ray_t: &interval::Interval,
+        rng: &mut rngs::SmallRng,
+    ) -> Option<HitRecord>;
     fn bounding_box(&self) -> &AABB;
 }

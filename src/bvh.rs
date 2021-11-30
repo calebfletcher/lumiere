@@ -88,18 +88,22 @@ impl Hittable for BVHNode {
         &self,
         r: &crate::ray::Ray,
         ray_t: &crate::interval::Interval,
+        rng: &mut rngs::SmallRng,
     ) -> Option<crate::object::HitRecord> {
         if !self.bbox.hit(r, ray_t) {
             return None;
         }
 
         // Check left for hits
-        let hit_left = self.left.as_ref().and_then(|b| b.hit(r, ray_t));
+        let hit_left = self.left.as_ref().and_then(|b| b.hit(r, ray_t, rng));
 
         // Check right for hits that are closer than the left's potential hits
         let new_max = hit_left.as_ref().map_or(ray_t.max, |hr| hr.t);
         let new_interval = Interval::new(ray_t.min, new_max);
-        let hit_right = self.right.as_ref().and_then(|b| b.hit(r, &new_interval));
+        let hit_right = self
+            .right
+            .as_ref()
+            .and_then(|b| b.hit(r, &new_interval, rng));
 
         // Prioritise hit_right, since it was checked with the reduced interval
         match hit_right {
