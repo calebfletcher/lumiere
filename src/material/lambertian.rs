@@ -1,4 +1,6 @@
-use std::rc::Rc;
+use std::sync::Arc;
+
+use rand::rngs;
 
 use crate::{
     object::HitRecord,
@@ -12,17 +14,17 @@ use super::{Behaviour, Material, MaterialScatterResult};
 
 #[derive(Debug)]
 pub struct Lambertian {
-    albedo: Rc<dyn Texture>,
+    albedo: Arc<dyn Texture>,
 }
 
 impl Lambertian {
-    pub fn new(albedo: Rc<dyn Texture>) -> Self {
+    pub fn new(albedo: Arc<dyn Texture>) -> Self {
         Self { albedo }
     }
 
     pub fn from_colour(albedo: Colour) -> Self {
         Self {
-            albedo: Rc::new(SolidColour::new(albedo)),
+            albedo: Arc::new(SolidColour::new(albedo)),
         }
     }
 }
@@ -32,7 +34,7 @@ impl Material for Lambertian {
         &self,
         r: &Ray,
         hitrec: &HitRecord,
-        rng: &mut rand::rngs::SmallRng,
+        rng: &mut rngs::SmallRng,
     ) -> MaterialScatterResult {
         let mut scatter_direction = hitrec.normal + Vec3::random_in_unit_sphere(rng).unit();
 

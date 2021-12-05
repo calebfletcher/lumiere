@@ -1,4 +1,6 @@
-use std::rc::Rc;
+use std::sync::Arc;
+
+use rand::rngs;
 
 use crate::{
     object::HitRecord,
@@ -12,7 +14,7 @@ use super::{Behaviour, Material, MaterialScatterResult};
 
 #[derive(Debug)]
 pub struct Metal {
-    albedo: Rc<dyn Texture>,
+    albedo: Arc<dyn Texture>,
     fuzziness: f64,
 }
 
@@ -22,7 +24,7 @@ impl Metal {
             fuzziness = 1.;
         }
         Self {
-            albedo: Rc::new(SolidColour::new(albedo)),
+            albedo: Arc::new(SolidColour::new(albedo)),
             fuzziness,
         }
     }
@@ -33,7 +35,7 @@ impl Material for Metal {
         &self,
         r: &Ray,
         hitrec: &HitRecord,
-        rng: &mut rand::rngs::SmallRng,
+        rng: &mut rngs::SmallRng,
     ) -> MaterialScatterResult {
         let reflected = r.direction.unit().reflect(&hitrec.normal);
         let scattered = Ray::new(

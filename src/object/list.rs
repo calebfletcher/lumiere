@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use rand::rngs;
 
 use crate::{aabb::AABB, interval, ray};
@@ -6,7 +8,7 @@ use super::Hittable;
 
 #[derive(Debug)]
 pub struct HittableList {
-    pub(crate) objects: Vec<Box<dyn Hittable>>,
+    pub(crate) objects: Vec<Arc<dyn Hittable>>,
     pub(crate) bbox: AABB,
 }
 
@@ -22,7 +24,7 @@ impl HittableList {
         self.objects.clear();
     }
 
-    pub fn add(&mut self, object: Box<dyn Hittable>) {
+    pub fn add(&mut self, object: Arc<dyn Hittable>) {
         self.bbox = AABB::from_boxes(&self.bbox, object.bounding_box());
         self.objects.push(object);
     }

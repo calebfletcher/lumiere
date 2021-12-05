@@ -14,3 +14,4 @@ rand = { version = "0.8.4", features = ["small_rng"]}
 png = "0.17.2"
 indicatif = "0.16.2"
 noise = "0.7.0"
+rayon = "1.5.1"

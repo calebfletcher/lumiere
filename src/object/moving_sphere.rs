@@ -1,4 +1,4 @@
-use std::{f64::consts, rc::Rc};
+use std::{f64::consts, sync::Arc};
 
 use rand::rngs;
 
@@ -13,7 +13,7 @@ pub struct MovingSphere {
     centre_1: Point3,
     centre_vec: Vec3,
     radius: f64,
-    mat: Rc<dyn material::Material>,
+    mat: Arc<dyn material::Material>,
     aabb: AABB,
 }
 
@@ -22,7 +22,7 @@ impl MovingSphere {
         centre_0: Point3,
         centre_1: Point3,
         radius: f64,
-        mat: Rc<dyn material::Material>,
+        mat: Arc<dyn material::Material>,
     ) -> Self {
         let rvec = Vec3::new(radius, radius, radius);
         let box0 = AABB::from_points(centre_0 - rvec, centre_0 + rvec);

@@ -1,13 +1,12 @@
-use std::{error::Error, path::Path, rc::Rc};
+use std::{error::Error, path::Path, sync::Arc};
 
 use lumiere::{
     bvh::BVHNode, camera, image, material, object, scene::Scene, texture, Colour, Point3,
 };
-
 use rand::{rngs, SeedableRng};
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let mut rng = rngs::SmallRng::from_entropy();
+    let mut rng = rngs::SmallRng::from_rng(rand::thread_rng()).unwrap();
 
     // Image parameters
     const ASPECT_RATIO: f64 = 16. / 9.;
@@ -37,21 +36,21 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut world = object::HittableList::new();
 
     // Sphere 1
-    let checker = Rc::new(texture::CheckerTexture::from_colours(
+    let checker = Arc::new(texture::CheckerTexture::from_colours(
         0.8,
         Colour::new(0.2, 0.3, 0.1),
         Colour::new(0.9, 0.9, 0.9),
     ));
-    let material_1 = Rc::new(material::Lambertian::new(checker.clone()));
-    world.add(Box::new(object::Sphere::new(
+    let material_1 = Arc::new(material::Lambertian::new(checker.clone()));
+    world.add(Arc::new(object::Sphere::new(
         Point3::new(0., -10., 0.),
         10.,
         material_1,
     )));
 
     // Sphere 2
-    let material_2 = Rc::new(material::Lambertian::new(checker));
-    world.add(Box::new(object::Sphere::new(
+    let material_2 = Arc::new(material::Lambertian::new(checker));
+    world.add(Arc::new(object::Sphere::new(
         Point3::new(0., 10., 0.),
         10.,
         material_2,
@@ -59,7 +58,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // Generate BVH tree
     let mut bvh_root = object::HittableList::new();
-    bvh_root.add(Box::new(BVHNode::new(world, &mut rng)));
+    bvh_root.add(Arc::new(BVHNode::new(world, &mut rng)));
 
     // Create scene
     let scene = Scene::new(
@@ -73,7 +72,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     );
 
     // Render the scene to a frame buffer
-    scene.render(&mut pixels, &mut rng)?;
+    scene.render(&mut pixels)?;
 
     // Write the frame buffer to a file
     image::png::write_image::<&Path, IMAGE_WIDTH, IMAGE_HEIGHT>(&pixels, Path::new("image.png"))?;

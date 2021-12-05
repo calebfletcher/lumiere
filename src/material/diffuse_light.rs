@@ -1,4 +1,6 @@
-use std::rc::Rc;
+use std::sync::Arc;
+
+use rand::rngs;
 
 use crate::{
     object::HitRecord,
@@ -12,17 +14,17 @@ use super::{Behaviour, Material, MaterialScatterResult};
 
 #[derive(Debug)]
 pub struct DiffuseLight {
-    emit: Rc<dyn Texture>,
+    emit: Arc<dyn Texture>,
 }
 
 impl DiffuseLight {
-    pub fn new(emit: Rc<dyn Texture>) -> Self {
+    pub fn new(emit: Arc<dyn Texture>) -> Self {
         Self { emit }
     }
 
     pub fn from_colour(emit: Colour) -> Self {
         Self {
-            emit: Rc::new(SolidColour::new(emit)),
+            emit: Arc::new(SolidColour::new(emit)),
         }
     }
 }
@@ -32,7 +34,7 @@ impl Material for DiffuseLight {
         &self,
         _r: &Ray,
         _hitrec: &HitRecord,
-        _rng: &mut rand::rngs::SmallRng,
+        _rng: &mut rngs::SmallRng,
     ) -> MaterialScatterResult {
         MaterialScatterResult::new(
             Behaviour::Absorb,

@@ -1,13 +1,12 @@
-use std::{error::Error, path::Path, rc::Rc};
+use std::{error::Error, path::Path, sync::Arc};
 
 use lumiere::{
     bvh::BVHNode, camera, image, material, object, scene::Scene, texture, Colour, Point3,
 };
-
 use rand::{rngs, SeedableRng};
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let mut rng = rngs::SmallRng::from_entropy();
+    let mut rng = rngs::SmallRng::from_rng(rand::thread_rng()).unwrap();
 
     // Image parameters
     const ASPECT_RATIO: f64 = 16. / 9.;
@@ -36,31 +35,31 @@ fn main() -> Result<(), Box<dyn Error>> {
     // World
     let mut world = object::HittableList::new();
 
-    let noise = Rc::new(texture::NoiseTexture::new());
-    let noise_texture = Rc::new(material::Lambertian::new(noise.clone()));
-    world.add(Box::new(object::Sphere::new(
+    let noise = Arc::new(texture::NoiseTexture::new());
+    let noise_texture = Arc::new(material::Lambertian::new(noise.clone()));
+    world.add(Arc::new(object::Sphere::new(
         Point3::new(0., -1000., 0.),
         1000.,
         noise_texture,
     )));
 
-    let noise_texture = Rc::new(material::Lambertian::new(noise));
-    world.add(Box::new(object::Sphere::new(
+    let noise_texture = Arc::new(material::Lambertian::new(noise));
+    world.add(Arc::new(object::Sphere::new(
         Point3::new(0., 2., 0.),
         2.,
         noise_texture,
     )));
 
-    let diff_light = Rc::new(material::DiffuseLight::from_colour(Colour::new(4., 4., 4.)));
-    world.add(Box::new(object::Quad::new(
+    let diff_light = Arc::new(material::DiffuseLight::from_colour(Colour::new(4., 4., 4.)));
+    world.add(Arc::new(object::Quad::new(
         Point3::new(3., 1., -2.),
         Point3::new(2., 0., 0.),
         Point3::new(0., 2., 0.),
         diff_light,
     )));
 
-    let diff_light = Rc::new(material::DiffuseLight::from_colour(Colour::new(4., 4., 4.)));
-    world.add(Box::new(object::Sphere::new(
+    let diff_light = Arc::new(material::DiffuseLight::from_colour(Colour::new(4., 4., 4.)));
+    world.add(Arc::new(object::Sphere::new(
         Point3::new(0., 7., 0.),
         2.,
         diff_light,
@@ -68,7 +67,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // Generate BVH tree
     let mut bvh_root = object::HittableList::new();
-    bvh_root.add(Box::new(BVHNode::new(world, &mut rng)));
+    bvh_root.add(Arc::new(BVHNode::new(world, &mut rng)));
 
     // Create scene
     let scene = Scene::new(
@@ -82,7 +81,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     );
 
     // Render the scene to a frame buffer
-    scene.render(&mut pixels, &mut rng)?;
+    scene.render(&mut pixels)?;
 
     // Write the frame buffer to a file
     image::png::write_image::<&Path, IMAGE_WIDTH, IMAGE_HEIGHT>(&pixels, Path::new("image.png"))?;

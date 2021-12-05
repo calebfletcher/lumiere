@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::sync::Arc;
 
 use rand::rngs;
 
@@ -8,7 +8,7 @@ use super::Hittable;
 
 #[derive(Debug)]
 pub struct RotateY {
-    object: Rc<dyn Hittable>,
+    object: Arc<dyn Hittable>,
     sin_theta: f64,
     cos_theta: f64,
     bbox: AABB,
@@ -16,7 +16,7 @@ pub struct RotateY {
 
 impl RotateY {
     /// Creates a new rotation transformation with the specified angle in degrees
-    pub fn new(object: Rc<dyn Hittable>, angle: f64) -> Self {
+    pub fn new(object: Arc<dyn Hittable>, angle: f64) -> Self {
         let rads = angle.to_radians();
         let sin_theta = rads.sin();
         let cos_theta = rads.cos();

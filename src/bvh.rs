@@ -1,4 +1,4 @@
-use std::cmp;
+use std::{cmp, sync::Arc};
 
 use rand::{rngs, Rng};
 
@@ -10,8 +10,8 @@ use crate::{
 
 #[derive(Debug)]
 pub struct BVHNode {
-    left: Option<Box<dyn Hittable>>,
-    right: Option<Box<dyn Hittable>>,
+    left: Option<Arc<dyn Hittable>>,
+    right: Option<Arc<dyn Hittable>>,
     bbox: AABB,
 }
 
@@ -20,7 +20,7 @@ impl BVHNode {
         Self::from_objects(list.objects, rng)
     }
 
-    fn from_objects(mut objects: Vec<Box<dyn Hittable>>, rng: &mut rngs::SmallRng) -> Self {
+    fn from_objects(mut objects: Vec<Arc<dyn Hittable>>, rng: &mut rngs::SmallRng) -> Self {
         let axis: usize = rng.gen_range(0..=2);
 
         let comparator = match axis {
@@ -48,8 +48,8 @@ impl BVHNode {
                 let midpoint = objects.len() / 2;
                 let other_elements = objects.split_off(midpoint);
 
-                let left: Box<dyn Hittable> = Box::new(BVHNode::from_objects(objects, rng));
-                let right: Box<dyn Hittable> = Box::new(BVHNode::from_objects(other_elements, rng));
+                let left: Arc<dyn Hittable> = Arc::new(BVHNode::from_objects(objects, rng));
+                let right: Arc<dyn Hittable> = Arc::new(BVHNode::from_objects(other_elements, rng));
 
                 (Some(left), Some(right))
             }
@@ -64,7 +64,7 @@ impl BVHNode {
         Self { left, right, bbox }
     }
 
-    fn box_compare(a: &Box<dyn Hittable>, b: &Box<dyn Hittable>, axis: usize) -> cmp::Ordering {
+    fn box_compare(a: &Arc<dyn Hittable>, b: &Arc<dyn Hittable>, axis: usize) -> cmp::Ordering {
         a.bounding_box()
             .axis(axis)
             .min
@@ -72,13 +72,13 @@ impl BVHNode {
             .expect("NANs encountered in bvh box compare")
     }
 
-    fn box_x_compare(a: &Box<dyn Hittable>, b: &Box<dyn Hittable>) -> cmp::Ordering {
+    fn box_x_compare(a: &Arc<dyn Hittable>, b: &Arc<dyn Hittable>) -> cmp::Ordering {
         Self::box_compare(a, b, 0)
     }
-    fn box_y_compare(a: &Box<dyn Hittable>, b: &Box<dyn Hittable>) -> cmp::Ordering {
+    fn box_y_compare(a: &Arc<dyn Hittable>, b: &Arc<dyn Hittable>) -> cmp::Ordering {
         Self::box_compare(a, b, 1)
     }
-    fn box_z_compare(a: &Box<dyn Hittable>, b: &Box<dyn Hittable>) -> cmp::Ordering {
+    fn box_z_compare(a: &Arc<dyn Hittable>, b: &Arc<dyn Hittable>) -> cmp::Ordering {
         Self::box_compare(a, b, 2)
     }
 }

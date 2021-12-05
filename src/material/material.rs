@@ -1,5 +1,7 @@
 use std::fmt;
 
+use rand::rngs;
+
 use crate::{object::HitRecord, ray::Ray, Colour, Point3};
 
 #[derive(Debug)]
@@ -25,12 +27,12 @@ impl MaterialScatterResult {
     }
 }
 
-pub trait Material: fmt::Debug {
+pub trait Material: fmt::Debug + Send + Sync {
     fn scatter(
         &self,
         r: &Ray,
         hitrec: &HitRecord,
-        rng: &mut rand::rngs::SmallRng,
+        rng: &mut rngs::SmallRng,
     ) -> MaterialScatterResult;
 
     fn emitted(&self, _u: f64, _v: f64, _p: &Point3) -> Colour {

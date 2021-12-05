@@ -1,4 +1,4 @@
-use std::{fmt, rc::Rc};
+use std::{fmt, sync::Arc};
 
 use rand::rngs;
 
@@ -12,7 +12,7 @@ pub struct HitRecord<'a> {
     pub u: f64,
     pub v: f64,
     pub front_face: bool,
-    pub mat: &'a Rc<dyn material::Material>,
+    pub mat: &'a Arc<dyn material::Material>,
 }
 
 impl<'a> HitRecord<'a> {
@@ -22,7 +22,7 @@ impl<'a> HitRecord<'a> {
         t: f64,
         u: f64,
         v: f64,
-        mat: &'a Rc<dyn material::Material>,
+        mat: &'a Arc<dyn material::Material>,
     ) -> Self {
         HitRecord {
             point,
@@ -45,7 +45,7 @@ impl<'a> HitRecord<'a> {
     }
 }
 
-pub trait Hittable: fmt::Debug {
+pub trait Hittable: fmt::Debug + Send + Sync {
     fn hit(
         &self,
         r: &Ray,

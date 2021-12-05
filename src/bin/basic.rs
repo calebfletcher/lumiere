@@ -1,11 +1,11 @@
-use std::{error::Error, path::Path, rc::Rc};
-
-use lumiere::{bvh::BVHNode, camera, image, material, object, scene::Scene, Colour, Point3};
+use std::{error::Error, path::Path, sync::Arc};
 
 use rand::{rngs, SeedableRng};
 
+use lumiere::{bvh::BVHNode, camera, image, material, object, scene::Scene, Colour, Point3};
+
 fn main() -> Result<(), Box<dyn Error>> {
-    let mut rng = rngs::SmallRng::from_entropy();
+    let mut rng = rngs::SmallRng::from_rng(rand::thread_rng()).unwrap();
 
     // Image parameters
     const ASPECT_RATIO: f64 = 16. / 9.;
@@ -35,26 +35,26 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut world = object::HittableList::new();
 
     // Ground
-    let material_ground = Rc::new(material::Lambertian::from_colour(Colour::new(
+    let material_ground = Arc::new(material::Lambertian::from_colour(Colour::new(
         0.5, 0.5, 0.5,
     )));
-    world.add(Box::new(object::Sphere::new(
+    world.add(Arc::new(object::Sphere::new(
         Point3::new(0., -1000., 0.),
         1000.,
         material_ground,
     )));
 
-    let material_3 = Rc::new(material::Metal::new(Colour::new(0.7, 0.6, 0.5), 0.0));
-    world.add(Box::new(object::Sphere::new(
+    let material_3 = Arc::new(material::Metal::new(Colour::new(0.7, 0.6, 0.5), 0.0));
+    world.add(Arc::new(object::Sphere::new(
         Point3::new(4., 1., 0.),
         1.,
         material_3,
     )));
 
-    let material_4 = Rc::new(material::Lambertian::from_colour(Colour::new(
+    let material_4 = Arc::new(material::Lambertian::from_colour(Colour::new(
         0.7, 0.1, 0.5,
     )));
-    world.add(Box::new(object::Sphere::new(
+    world.add(Arc::new(object::Sphere::new(
         Point3::new(7., 1., 0.),
         0.4,
         material_4,
@@ -62,7 +62,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // Generate BVH tree
     let mut bvh_root = object::HittableList::new();
-    bvh_root.add(Box::new(BVHNode::new(world, &mut rng)));
+    bvh_root.add(Arc::new(BVHNode::new(world, &mut rng)));
 
     // Create scene
     let scene = Scene::new(
@@ -76,7 +76,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     );
 
     // Render the scene to a frame buffer
-    scene.render(&mut pixels, &mut rng)?;
+    scene.render(&mut pixels)?;
 
     // Write the frame buffer to a file
     image::png::write_image::<&Path, IMAGE_WIDTH, IMAGE_HEIGHT>(&pixels, Path::new("image.png"))?;

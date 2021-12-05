@@ -1,4 +1,4 @@
-use std::{f64::consts, rc::Rc};
+use std::{f64::consts, sync::Arc};
 
 use rand::rngs;
 
@@ -10,12 +10,12 @@ use super::object;
 pub struct Sphere {
     centre: Point3,
     radius: f64,
-    mat: Rc<dyn material::Material>,
+    mat: Arc<dyn material::Material>,
     aabb: AABB,
 }
 
 impl Sphere {
-    pub fn new(centre: Point3, radius: f64, mat: Rc<dyn material::Material>) -> Self {
+    pub fn new(centre: Point3, radius: f64, mat: Arc<dyn material::Material>) -> Self {
         let rvec = Vec3::new(radius, radius, radius);
         let aabb = AABB::from_points(centre - rvec, centre + rvec);
         Self {

@@ -1,13 +1,12 @@
-use std::{error::Error, path::Path, rc::Rc};
+use std::{error::Error, path::Path, sync::Arc};
 
 use lumiere::{
     bvh::BVHNode, camera, image, material, object, scene::Scene, vec3::Vec3, Colour, Point3,
 };
-
 use rand::{rngs, SeedableRng};
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let mut rng = rngs::SmallRng::from_entropy();
+    let mut rng = rngs::SmallRng::from_rng(rand::thread_rng()).unwrap();
 
     // Image parameters
     const ASPECT_RATIO: f64 = 16. / 9.;
@@ -36,39 +35,39 @@ fn main() -> Result<(), Box<dyn Error>> {
     // World
     let mut world = object::HittableList::new();
 
-    let left_red = Rc::new(material::Lambertian::from_colour(Colour::new(1., 0.2, 0.2)));
-    let back_green = Rc::new(material::Lambertian::from_colour(Colour::new(0.2, 1., 0.2)));
-    let right_blue = Rc::new(material::Lambertian::from_colour(Colour::new(0.2, 0.2, 1.)));
-    let upper_orange = Rc::new(material::Lambertian::from_colour(Colour::new(1., 0.5, 0.)));
-    let lower_teal = Rc::new(material::Lambertian::from_colour(Colour::new(
+    let left_red = Arc::new(material::Lambertian::from_colour(Colour::new(1., 0.2, 0.2)));
+    let back_green = Arc::new(material::Lambertian::from_colour(Colour::new(0.2, 1., 0.2)));
+    let right_blue = Arc::new(material::Lambertian::from_colour(Colour::new(0.2, 0.2, 1.)));
+    let upper_orange = Arc::new(material::Lambertian::from_colour(Colour::new(1., 0.5, 0.)));
+    let lower_teal = Arc::new(material::Lambertian::from_colour(Colour::new(
         0.2, 0.8, 0.8,
     )));
 
-    world.add(Box::new(object::Quad::new(
+    world.add(Arc::new(object::Quad::new(
         Point3::new(-3., -2., 5.),
         Vec3::new(0., 0., -4.),
         Vec3::new(0., 4., 0.),
         left_red,
     )));
-    world.add(Box::new(object::Quad::new(
+    world.add(Arc::new(object::Quad::new(
         Point3::new(-2., -2., 0.),
         Vec3::new(4., 0., 0.),
         Vec3::new(0., 4., 0.),
         back_green,
     )));
-    world.add(Box::new(object::Quad::new(
+    world.add(Arc::new(object::Quad::new(
         Point3::new(3., -2., 1.),
         Vec3::new(0., 0., 4.),
         Vec3::new(0., 4., 0.),
         right_blue,
     )));
-    world.add(Box::new(object::Quad::new(
+    world.add(Arc::new(object::Quad::new(
         Point3::new(-2., 3., 1.),
         Vec3::new(4., 0., 0.),
         Vec3::new(0., 0., 4.),
         upper_orange,
     )));
-    world.add(Box::new(object::Quad::new(
+    world.add(Arc::new(object::Quad::new(
         Point3::new(-2., -3., 5.),
         Vec3::new(4., 0., 0.),
         Vec3::new(0., 0., -4.),
@@ -77,7 +76,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // Generate BVH tree
     let mut bvh_root = object::HittableList::new();
-    bvh_root.add(Box::new(BVHNode::new(world, &mut rng)));
+    bvh_root.add(Arc::new(BVHNode::new(world, &mut rng)));
 
     // Create scene
     let scene = Scene::new(
@@ -91,7 +90,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     );
 
     // Render the scene to a frame buffer
-    scene.render(&mut pixels, &mut rng)?;
+    scene.render(&mut pixels)?;
 
     // Write the frame buffer to a file
     image::png::write_image::<&Path, IMAGE_WIDTH, IMAGE_HEIGHT>(&pixels, Path::new("image.png"))?;

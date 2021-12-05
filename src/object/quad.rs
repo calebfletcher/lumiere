@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::sync::Arc;
 
 use rand::rngs;
 
@@ -11,7 +11,7 @@ pub struct Quad {
     q: Point3,
     u: Vec3,
     v: Vec3,
-    mat: Rc<dyn material::Material>,
+    mat: Arc<dyn material::Material>,
     aabb: AABB,
     normal: Vec3,
     d: f64,
@@ -19,7 +19,7 @@ pub struct Quad {
 }
 
 impl Quad {
-    pub fn new(q: Point3, u: Vec3, v: Vec3, mat: Rc<dyn material::Material>) -> Self {
+    pub fn new(q: Point3, u: Vec3, v: Vec3, mat: Arc<dyn material::Material>) -> Self {
         let aabb = AABB::from_points(q, q + u + v).pad();
         let n = u.cross(v);
         let normal = n.unit();
@@ -81,7 +81,7 @@ impl Hittable for Quad {
     }
 }
 
-pub fn new_box<'a>(a: &Point3, b: &Point3, mat: Rc<dyn material::Material>) -> HittableList {
+pub fn new_box<'a>(a: &Point3, b: &Point3, mat: Arc<dyn material::Material>) -> HittableList {
     let mut sides = HittableList::new();
 
     let min = Point3::new(a.x.min(b.x), a.y.min(b.y), a.z.min(b.z));
@@ -92,42 +92,42 @@ pub fn new_box<'a>(a: &Point3, b: &Point3, mat: Rc<dyn material::Material>) -> H
     let dz = Vec3::new(0., 0., max.z - min.z);
 
     // Front
-    sides.add(Box::new(Quad::new(
+    sides.add(Arc::new(Quad::new(
         Point3::new(min.x, min.y, max.z),
         dx,
         dy,
         mat.clone(),
     )));
     // Right
-    sides.add(Box::new(Quad::new(
+    sides.add(Arc::new(Quad::new(
         Point3::new(max.x, min.y, max.z),
         -dz,
         dy,
         mat.clone(),
     )));
     // Back
-    sides.add(Box::new(Quad::new(
+    sides.add(Arc::new(Quad::new(
         Point3::new(max.x, min.y, min.z),
         -dx,
         dy,
         mat.clone(),
     )));
     // Left
-    sides.add(Box::new(Quad::new(
+    sides.add(Arc::new(Quad::new(
         Point3::new(min.x, min.y, min.z),
         dz,
         dy,
         mat.clone(),
     )));
     // Top
-    sides.add(Box::new(Quad::new(
+    sides.add(Arc::new(Quad::new(
         Point3::new(min.x, max.y, max.z),
         dx,
         -dz,
         mat.clone(),
     )));
     // Bottom
-    sides.add(Box::new(Quad::new(
+    sides.add(Arc::new(Quad::new(
         Point3::new(min.x, min.y, min.z),
         dx,
         dz,
@@ -139,7 +139,7 @@ pub fn new_box<'a>(a: &Point3, b: &Point3, mat: Rc<dyn material::Material>) -> H
 
 #[cfg(test)]
 mod tests {
-    use std::rc::Rc;
+    use std::sync::Arc;
 
     use rand::{rngs, SeedableRng};
 
@@ -149,7 +149,7 @@ mod tests {
 
     #[test]
     fn hit_quad_centre() {
-        let mat = Rc::new(material::Lambertian::from_colour(Colour::new(1., 0.2, 0.2)));
+        let mat = Arc::new(material::Lambertian::from_colour(Colour::new(1., 0.2, 0.2)));
         let q = Vec3::new(-0.5, -0.5, 1.);
         let u = Vec3::new(1., 0., 0.);
         let v = Vec3::new(0., 1., 0.);
@@ -159,7 +159,9 @@ mod tests {
         let ray_direction = Vec3::new(0., 0., 1.);
         let r = Ray::new(ray_origin, ray_direction, 0.);
 
-        let hit_result = quad.hit(&r, &interval::UNIVERSE, &mut rngs::SmallRng::from_entropy());
+        let mut rng = rngs::SmallRng::from_rng(rand::thread_rng()).unwrap();
+
+        let hit_result = quad.hit(&r, &interval::UNIVERSE, &mut rng);
 
         assert!(hit_result.is_some());
         let hit_result = hit_result.unwrap();
@@ -170,7 +172,7 @@ mod tests {
 
     #[test]
     fn hit_quad_off_centre() {
-        let mat = Rc::new(material::Lambertian::from_colour(Colour::new(1., 0.2, 0.2)));
+        let mat = Arc::new(material::Lambertian::from_colour(Colour::new(1., 0.2, 0.2)));
         let q = Vec3::new(-0.5, -0.5, 1.);
         let u = Vec3::new(1., 0., 0.);
         let v = Vec3::new(0., 1., 0.);
@@ -180,7 +182,10 @@ mod tests {
         let ray_direction = Vec3::new(0., 0., 1.);
         let r = Ray::new(ray_origin, ray_direction, 0.);
 
-        let hit_result = quad.hit(&r, &interval::UNIVERSE, &mut rngs::SmallRng::from_entropy());
+        let _rng = rngs::SmallRng::from_rng(rand::thread_rng()).unwrap();
+        let mut rng = rngs::SmallRng::from_entropy();
+
+        let hit_result = quad.hit(&r, &interval::UNIVERSE, &mut rng);
 
         assert!(hit_result.is_some());
         let hit_result = hit_result.unwrap();
@@ -191,97 +196,74 @@ mod tests {
 
     #[test]
     fn hit_quad_multiple() {
-        let mat = Rc::new(material::Lambertian::from_colour(Colour::new(1., 0.2, 0.2)));
+        let mat = Arc::new(material::Lambertian::from_colour(Colour::new(1., 0.2, 0.2)));
         let q = Vec3::new(-0.5, -0.5, 1.);
         let u = Vec3::new(1., 0., 0.);
         let v = Vec3::new(0., 1., 0.);
         let quad = Quad::new(q, u, v, mat);
 
         let ray_origin = Point3::new(0., 0., 0.);
+        let mut rng = rngs::SmallRng::from_rng(rand::thread_rng()).unwrap();
 
         // Hit rays
 
         // Ray 1
         let ray_direction = Vec3::new(0.2, 0., 1.);
         let r = Ray::new(ray_origin, ray_direction, 0.);
-        assert!(quad
-            .hit(&r, &interval::UNIVERSE, &mut rngs::SmallRng::from_entropy())
-            .is_some());
+        assert!(quad.hit(&r, &interval::UNIVERSE, &mut rng).is_some());
         // Ray 2
         let ray_direction = Vec3::new(-0.2, 0., 1.);
         let r = Ray::new(ray_origin, ray_direction, 0.);
-        assert!(quad
-            .hit(&r, &interval::UNIVERSE, &mut rngs::SmallRng::from_entropy())
-            .is_some());
+        assert!(quad.hit(&r, &interval::UNIVERSE, &mut rng).is_some());
         // Ray 3
         let ray_direction = Vec3::new(0., 0.2, 1.);
         let r = Ray::new(ray_origin, ray_direction, 0.);
-        assert!(quad
-            .hit(&r, &interval::UNIVERSE, &mut rngs::SmallRng::from_entropy())
-            .is_some());
+        assert!(quad.hit(&r, &interval::UNIVERSE, &mut rng).is_some());
         // Ray 4
         let ray_direction = Vec3::new(0., -0.2, 1.);
         let r = Ray::new(ray_origin, ray_direction, 0.);
-        assert!(quad
-            .hit(&r, &interval::UNIVERSE, &mut rngs::SmallRng::from_entropy())
-            .is_some());
+        assert!(quad.hit(&r, &interval::UNIVERSE, &mut rng).is_some());
         // Ray 5
         let ray_direction = Vec3::new(0.2, 0.2, 1.);
         let r = Ray::new(ray_origin, ray_direction, 0.);
-        assert!(quad
-            .hit(&r, &interval::UNIVERSE, &mut rngs::SmallRng::from_entropy())
-            .is_some());
+        assert!(quad.hit(&r, &interval::UNIVERSE, &mut rng).is_some());
         // Ray 6
         let ray_direction = Vec3::new(0.2, -0.2, 1.);
         let r = Ray::new(ray_origin, ray_direction, 0.);
-        assert!(quad
-            .hit(&r, &interval::UNIVERSE, &mut rngs::SmallRng::from_entropy())
-            .is_some());
+        assert!(quad.hit(&r, &interval::UNIVERSE, &mut rng).is_some());
         // Ray 7
         let ray_direction = Vec3::new(-0.2, 0.2, 1.);
         let r = Ray::new(ray_origin, ray_direction, 0.);
-        assert!(quad
-            .hit(&r, &interval::UNIVERSE, &mut rngs::SmallRng::from_entropy())
-            .is_some());
+        assert!(quad.hit(&r, &interval::UNIVERSE, &mut rng).is_some());
         // Ray 8
         let ray_direction = Vec3::new(-0.2, -0.2, 1.);
         let r = Ray::new(ray_origin, ray_direction, 0.);
-        assert!(quad
-            .hit(&r, &interval::UNIVERSE, &mut rngs::SmallRng::from_entropy())
-            .is_some());
+        assert!(quad.hit(&r, &interval::UNIVERSE, &mut rng).is_some());
 
         // Miss rays
 
         // Ray 1
         let ray_direction = Vec3::new(1., 1., 1.);
         let r = Ray::new(ray_origin, ray_direction, 0.);
-        assert!(quad
-            .hit(&r, &interval::UNIVERSE, &mut rngs::SmallRng::from_entropy())
-            .is_none());
+        assert!(quad.hit(&r, &interval::UNIVERSE, &mut rng).is_none());
         // Ray 2
         let ray_direction = Vec3::new(1., -1., 1.);
         let r = Ray::new(ray_origin, ray_direction, 0.);
-        assert!(quad
-            .hit(&r, &interval::UNIVERSE, &mut rngs::SmallRng::from_entropy())
-            .is_none());
+        assert!(quad.hit(&r, &interval::UNIVERSE, &mut rng).is_none());
         // Ray 3
         let ray_direction = Vec3::new(-1., 1., 1.);
         let r = Ray::new(ray_origin, ray_direction, 0.);
-        assert!(quad
-            .hit(&r, &interval::UNIVERSE, &mut rngs::SmallRng::from_entropy())
-            .is_none());
+        assert!(quad.hit(&r, &interval::UNIVERSE, &mut rng).is_none());
         // Ray 4
         let ray_direction = Vec3::new(-1., 1., 1.);
         let r = Ray::new(ray_origin, ray_direction, 0.);
-        assert!(quad
-            .hit(&r, &interval::UNIVERSE, &mut rngs::SmallRng::from_entropy())
-            .is_none());
+        assert!(quad.hit(&r, &interval::UNIVERSE, &mut rng).is_none());
     }
 
     #[test]
     fn hit_top() {
-        let back_green = Rc::new(material::Lambertian::from_colour(Colour::new(0.2, 1., 0.2)));
-        let green = Box::new(Quad::new(
+        let back_green = Arc::new(material::Lambertian::from_colour(Colour::new(0.2, 1., 0.2)));
+        let green = Arc::new(Quad::new(
             Point3::new(-2., -2., 0.),
             Vec3::new(4., 0., 0.),
             Vec3::new(0., 4., 0.),
@@ -302,8 +284,8 @@ mod tests {
             time: 0.22690750755679256,
         };
 
-        assert!(green
-            .hit(&r, &interval::UNIVERSE, &mut rngs::SmallRng::from_entropy())
-            .is_none());
+        let mut rng = rngs::SmallRng::from_rng(rand::thread_rng()).unwrap();
+
+        assert!(green.hit(&r, &interval::UNIVERSE, &mut rng).is_none());
     }
 }

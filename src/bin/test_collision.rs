@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::sync::Arc;
 
 use lumiere::{
     interval, material,
@@ -7,11 +7,11 @@ use lumiere::{
     vec3::Vec3,
     Point3,
 };
-use rand::SeedableRng;
+use rand::{rngs, SeedableRng};
 
 fn main() {
-    let mut rng = rand::rngs::SmallRng::from_entropy();
-    let material_centre = Rc::new(material::Dielectric::new(1.5));
+    let mut rng = rngs::SmallRng::from_rng(rand::thread_rng()).unwrap();
+    let material_centre = Arc::new(material::Dielectric::new(1.5));
 
     let sphere = object::Sphere::new(Point3::new(2., 0., 0.), 0.5, material_centre);
 

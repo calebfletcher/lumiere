@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::sync::Arc;
 
 use rand::{rngs, Rng};
 
@@ -8,27 +8,27 @@ use super::{HitRecord, Hittable};
 
 #[derive(Debug)]
 pub struct ConstantMedium {
-    phase_function: Rc<dyn material::Material>,
-    boundary: Rc<dyn Hittable>,
+    phase_function: Arc<dyn material::Material>,
+    boundary: Arc<dyn Hittable>,
     neg_inv_density: f64,
 }
 
 impl ConstantMedium {
     pub fn new(
-        boundary: Rc<dyn Hittable>,
+        boundary: Arc<dyn Hittable>,
         density: f64,
-        texture: Rc<dyn texture::Texture>,
+        texture: Arc<dyn texture::Texture>,
     ) -> Self {
         Self {
-            phase_function: Rc::new(material::Isotropic::new(texture)),
+            phase_function: Arc::new(material::Isotropic::new(texture)),
             boundary,
             neg_inv_density: -1. / density,
         }
     }
 
-    pub fn from_colour(boundary: Rc<dyn Hittable>, density: f64, colour: Colour) -> Self {
+    pub fn from_colour(boundary: Arc<dyn Hittable>, density: f64, colour: Colour) -> Self {
         Self {
-            phase_function: Rc::new(material::Isotropic::from_colour(colour)),
+            phase_function: Arc::new(material::Isotropic::from_colour(colour)),
             boundary,
             neg_inv_density: -1. / density,
         }
