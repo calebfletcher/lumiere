@@ -1,12 +1,7 @@
 use std::{error::Error, path::Path, rc::Rc};
 
 use lumiere::{
-    bvh::BVHNode,
-    camera, image, material,
-    object::{self, rotate::RotateY, Translate},
-    scene::Scene,
-    vec3::Vec3,
-    Colour, Point3,
+    bvh::BVHNode, camera, image, material, object, scene::Scene, vec3::Vec3, Colour, Point3,
 };
 
 use rand::{rngs, Rng, SeedableRng};
