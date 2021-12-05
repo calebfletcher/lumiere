@@ -21,7 +21,11 @@ fn main() {
 
     println!("iter 1");
     let hitrec = sphere
-        .hit(&ray, &interval::Interval::new(0.0001, f64::INFINITY))
+        .hit(
+            &ray,
+            &interval::Interval::new(0.0001, f64::INFINITY),
+            &mut rng,
+        )
         .unwrap();
     dbg!(&hitrec);
 
@@ -33,6 +37,7 @@ fn main() {
         .hit(
             &scatter_result.scattered,
             &interval::Interval::new(0.0001, f64::INFINITY),
+            &mut rng,
         )
         .unwrap();
     dbg!(&hitrec);
