@@ -92,11 +92,17 @@ impl Scene {
 
     fn render_pixel(&self, row: usize, col: usize, rng: &mut rngs::SmallRng) -> (u8, u8, u8) {
         let mut pixel_colour = Colour::zeros();
-        for _ in 0..self.samples_per_pixel {
-            let u = (col as f64 + rng.gen::<f64>()) / (self.image_width - 1) as f64;
-            let v = (row as f64 + rng.gen::<f64>()) / (self.image_height - 1) as f64;
-            let r = self.camera.get_ray(u, v, rng);
-            pixel_colour += self.ray_colour(&r, self.max_depth, rng);
+        let sqrt_spp = (self.samples_per_pixel as f64).sqrt().round() as usize;
+
+        for i in 0..sqrt_spp {
+            for j in 0..sqrt_spp {
+                let u = (col as f64 + (i as f64 + rng.gen::<f64>()) / sqrt_spp as f64)
+                    / (self.image_width - 1) as f64;
+                let v = (row as f64 + (j as f64 + rng.gen::<f64>()) / sqrt_spp as f64)
+                    / (self.image_height - 1) as f64;
+                let r = self.camera.get_ray(u, v, rng);
+                pixel_colour += self.ray_colour(&r, self.max_depth, rng);
+            }
         }
         pixel_colour /= self.samples_per_pixel as f64;
 
