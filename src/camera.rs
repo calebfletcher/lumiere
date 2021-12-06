@@ -8,7 +8,8 @@ pub struct CameraBuilder {
     aperture: f64,
     focus_dist: f64,
     fov: f64,
-    look_dir: Vec3,
+    look_dir: Option<Vec3>,
+    look_at: Vec3,
     v_up: Vec3,
 }
 
@@ -20,7 +21,8 @@ impl CameraBuilder {
             aperture: 0.,
             focus_dist: 10.,
             fov: 40.,
-            look_dir: Vec3::new(0., 0., 1.).unit(),
+            look_dir: None,
+            look_at: Vec3::new(0., 0., 0.).unit(),
             v_up: Vec3::new(0., 1., 0.),
         }
     }
@@ -31,7 +33,12 @@ impl CameraBuilder {
     }
 
     pub fn look_dir(&mut self, look_dir: Vec3) -> &mut Self {
-        self.look_dir = look_dir;
+        self.look_dir = Some(look_dir);
+        self
+    }
+
+    pub fn look_at(&mut self, look_at: Vec3) -> &mut Self {
+        self.look_at = look_at;
         self
     }
 
@@ -67,7 +74,12 @@ impl CameraBuilder {
         let viewport_height = 2.0 * h;
         let viewport_width = self.aspect_ratio * viewport_height;
 
-        let w = -self.look_dir.unit();
+        let look_dir = match self.look_dir {
+            Some(look_dir) => look_dir,
+            None => self.look_at - self.origin,
+        };
+
+        let w = -look_dir.unit();
         let u = self.v_up.cross(w);
         let v = w.cross(u);
 

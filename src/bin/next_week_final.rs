@@ -23,10 +23,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     // Generate the objects
 
     // Camera
-    let camera_look_dir = Point3::new(-200., -200., 600.);
     let camera = camera::CameraBuilder::new()
         .origin(Point3::new(478., 278., -600.))
-        .look_dir(camera_look_dir)
+        .look_at(Point3::new(278., 278., 0.))
         .fov(40.)
         .aspect_ratio(ASPECT_RATIO)
         .aperture(0.)
