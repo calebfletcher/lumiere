@@ -1,7 +1,8 @@
 use std::{error::Error, path::Path, sync::Arc};
 
 use lumiere::{
-    bvh::BVHNode, camera, image, material, object, scene::Scene, vec3::Vec3, Colour, Point3,
+    bvh::BVHNode, camera, image, material, object, scene::Scene, texture, vec3::Vec3, Colour,
+    Point3,
 };
 
 use rand::{rngs, Rng, SeedableRng};
@@ -11,10 +12,10 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // Image parameters
     const ASPECT_RATIO: f64 = 9. / 9.;
-    const IMAGE_WIDTH: usize = 900;
+    const IMAGE_WIDTH: usize = 600;
     const IMAGE_HEIGHT: usize = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as usize;
     let samples_per_pixel: usize = 3000;
-    let max_depth = 4;
+    let max_depth = 50;
 
     // Pixel array as height * rows * channels 8 bit values
     const BUFFER_LENGTH: usize = 3 * IMAGE_WIDTH * IMAGE_HEIGHT;
@@ -40,12 +41,12 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // Ground boxes
     let mut boxes1 = object::HittableList::new();
-    let boxes_per_side = 10;
+    let boxes_per_side = 20;
     for i in 0..boxes_per_side {
         for j in 0..boxes_per_side {
             let w = 100.;
-            let x0 = 680. - i as f64 * w;
-            let z0 = -350. + j as f64 * w;
+            let x0 = -1000. + i as f64 * w;
+            let z0 = -1000. + j as f64 * w;
             let y0 = 0.;
             let x1 = x0 + w;
             let y1 = rng.gen_range(1.0..=100.0);
@@ -67,6 +68,93 @@ fn main() -> Result<(), Box<dyn Error>> {
         Vec3::new(300., 0., 0.),
         Vec3::new(0., 0., 265.),
         light,
+    )));
+
+    // Add moving sphere
+    let centre1 = Point3::new(400., 400., 200.);
+    let centre2 = centre1 + Vec3::new(30., 0., 0.);
+    let moving_sphere_material = Arc::new(material::Lambertian::from_colour(Colour::new(
+        0.7, 0.3, 0.1,
+    )));
+    world.add(Arc::new(object::MovingSphere::new(
+        centre1,
+        centre2,
+        50.,
+        moving_sphere_material,
+    )));
+
+    // Add glass ball
+    world.add(Arc::new(object::Sphere::new(
+        Point3::new(260., 150., 45.),
+        50.,
+        Arc::new(material::Dielectric::new(1.5)),
+    )));
+
+    // Add metal ball
+    world.add(Arc::new(object::Sphere::new(
+        Point3::new(0., 150., 145.),
+        50.,
+        Arc::new(material::Metal::new(Colour::new(0.8, 0.8, 0.9), 1.)),
+    )));
+
+    // Add boundary
+    let boundary = Arc::new(object::Sphere::new(
+        Point3::new(360., 150., 145.),
+        70.,
+        Arc::new(material::Dielectric::new(1.5)),
+    ));
+    world.add(boundary.clone());
+    world.add(Arc::new(object::ConstantMedium::from_colour(
+        boundary,
+        0.2,
+        Colour::new(0.2, 0.4, 0.9),
+    )));
+    let boundary = Arc::new(object::Sphere::new(
+        Point3::new(0., 0., 0.),
+        5000.,
+        Arc::new(material::Dielectric::new(1.5)),
+    ));
+    world.add(Arc::new(object::ConstantMedium::from_colour(
+        boundary,
+        0.0001,
+        Colour::new(1., 1., 1.),
+    )));
+
+    // Add Earth
+    let emat = Arc::new(material::Lambertian::new(Arc::new(
+        texture::ImageTexture::new("earthmap.png"),
+    )));
+    world.add(Arc::new(object::Sphere::new(
+        Point3::new(400., 200., 400.),
+        100.,
+        emat,
+    )));
+
+    // Add noise texture
+    let pertext = Arc::new(texture::NoiseTexture::with_scale(0.1));
+    world.add(Arc::new(object::Sphere::new(
+        Point3::new(220., 280., 300.),
+        80.,
+        Arc::new(material::Lambertian::new(pertext)),
+    )));
+
+    let mut boxes2 = object::HittableList::new();
+    let white = Arc::new(material::Lambertian::from_colour(Colour::new(
+        0.73, 0.73, 0.73,
+    )));
+    for _ in 0..1000 {
+        boxes2.add(Arc::new(object::Sphere::new(
+            Point3::random_in_range(&mut rng, 0.0..165.0),
+            10.,
+            white.clone(),
+        )));
+    }
+    world.add(Arc::new(object::Translate::new(
+        Arc::new(object::RotateY::new(
+            Arc::new(BVHNode::new(boxes2, &mut rng)),
+            15.,
+        )),
+        Vec3::new(-100., 270., 395.),
     )));
 
     // Generate BVH tree
