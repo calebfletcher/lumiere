@@ -1,7 +1,7 @@
 use indicatif::{ProgressBar, ProgressStyle};
 use rand::{seq::SliceRandom, thread_rng, SeedableRng};
 use rayon::prelude::*;
-use std::io;
+use std::{io, sync::atomic::AtomicUsize};
 
 use crate::{
     camera::Camera,
@@ -54,6 +54,8 @@ impl Scene {
         rows.shuffle(&mut thread_rng());
         cols.shuffle(&mut thread_rng());
 
+        let count = AtomicUsize::new(0);
+
         let mut pixelbuff: Vec<(usize, Vec<u8>)> = rows
             .par_iter()
             .map(|row| {
@@ -70,6 +72,10 @@ impl Scene {
                     row_buffer[pixel_offset + 1] = pixel_colour.1;
                     row_buffer[pixel_offset + 2] = pixel_colour.2;
                 }
+                let i = count.fetch_add(1, std::sync::atomic::Ordering::AcqRel);
+
+                println!("count {}", i);
+
                 (*row, row_buffer)
             })
             .collect();
