@@ -18,6 +18,13 @@ impl NoiseTexture {
         }
     }
 
+    pub fn with_scale(scale: f64) -> Self {
+        Self {
+            noise: SuperSimplex::new(),
+            scale,
+        }
+    }
+
     fn turb(&self, p: &Point3) -> f64 {
         let depth = 7;
         let mut accum = 0.;

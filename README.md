@@ -9,6 +9,7 @@ Angular commit messages, with the following topics:
  - render
  - camera
  - material
+ - texture
  - object
  - world
  - math
