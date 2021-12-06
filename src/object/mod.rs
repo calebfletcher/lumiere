@@ -12,5 +12,6 @@ pub use list::HittableList;
 pub use moving_sphere::MovingSphere;
 pub use object::{HitRecord, Hittable};
 pub use quad::Quad;
+pub use rotate::RotateY;
 pub use sphere::Sphere;
 pub use translate::Translate;
